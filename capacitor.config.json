@@ -1,0 +1,8 @@
+{
+  "appId": "com.crewfind.app",
+  "appName": "CrewFind",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}
