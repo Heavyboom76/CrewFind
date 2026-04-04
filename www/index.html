@@ -1645,9 +1645,17 @@
     }
   });
 
-  // INIT — onAuthStateChange handles session restore + renderListings on load
-  // initShipSearch is UI-only, safe to call immediately
+  // INIT — if URL has auth token hash, Supabase will fire SIGNED_IN via onAuthStateChange
+  // For all other cases, onAuthStateChange INITIAL_SESSION handles it
+  // If no auth callback detected after 3 seconds, force a render anyway as fallback
   initShipSearch();
+  setTimeout(async () => {
+    const grid = document.getElementById('listings-grid');
+    if (grid && grid.innerHTML.includes('LOADING')) {
+      await checkHandle();
+      await renderListings();
+    }
+  }, 3000);
 
   // listeners handled inline
 </script>
