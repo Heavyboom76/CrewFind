@@ -1622,12 +1622,9 @@
     }
   }
 
-  // Listen for auth state changes
-  let authHandled = false;
+  // Listen for auth state changes — update UI when session changes
   sb.auth.onAuthStateChange(async (event, session) => {
-    if (authHandled && event === 'INITIAL_SESSION') return;
-    if (event === 'INITIAL_SESSION') authHandled = true;
-    if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') && session) {
+    if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session) {
       currentUser = session.user;
       const discordUsername = session.user.user_metadata?.full_name ||
                               session.user.user_metadata?.name ||
@@ -1637,25 +1634,34 @@
       localStorage.setItem('discord_username', session.user.user_metadata?.custom_claims?.global_name || discordUsername);
       document.getElementById('pilot-handle').textContent = currentHandle;
       document.getElementById('onboarding').style.display = 'none';
-      await renderListings();
-    } else if (event === 'INITIAL_SESSION' && !session) {
-      // No session on load — fall back to saved handle then render
-      await checkHandle();
-      await renderListings();
     }
   });
 
-  // INIT — if URL has auth token hash, Supabase will fire SIGNED_IN via onAuthStateChange
-  // For all other cases, onAuthStateChange INITIAL_SESSION handles it
-  // If no auth callback detected after 3 seconds, force a render anyway as fallback
+  // INIT — always load immediately on page load
   initShipSearch();
-  setTimeout(async () => {
-    const grid = document.getElementById('listings-grid');
-    if (grid && grid.innerHTML.includes('LOADING')) {
+  (async () => {
+    // Check for existing session first
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session && session.user) {
+        currentUser = session.user;
+        const discordUsername = session.user.user_metadata?.full_name ||
+                                session.user.user_metadata?.name ||
+                                'PILOT';
+        currentHandle = discordUsername.toUpperCase().replace(/\s+/g, '_');
+        localStorage.setItem('rsi_handle', currentHandle);
+        localStorage.setItem('discord_username', session.user.user_metadata?.custom_claims?.global_name || discordUsername);
+        document.getElementById('pilot-handle').textContent = currentHandle;
+        document.getElementById('onboarding').style.display = 'none';
+      } else {
+        await checkHandle();
+      }
+    } catch(e) {
+      console.error('Session check error:', e);
       await checkHandle();
-      await renderListings();
     }
-  }, 3000);
+    await renderListings();
+  })();
 
   // listeners handled inline
 </script>
