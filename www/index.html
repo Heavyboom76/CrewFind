@@ -1328,7 +1328,7 @@
       if (error) throw error;
       const now = new Date();
       myPosts = (data || [])
-        .filter(l => !l.expires_at || new Date(l.expires_at) > now)
+        .filter(l => (!l.expires_at || new Date(l.expires_at) > now) && l.owner && l.owner.toUpperCase() === currentHandle.toUpperCase())
         .map(l => ({
           ...l,
           roles: typeof l.roles === 'string' ? l.roles.split(',') : (l.roles || [])
