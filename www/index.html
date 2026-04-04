@@ -861,11 +861,11 @@
       </div>
 
       <!-- Discord banner -->
-      <div onclick="window.open('https://discord.gg/fx9XvYnGmB','_blank')" style="cursor:pointer;margin-bottom:16px;padding:10px 14px;border:1px solid rgba(232,168,79,0.3);background:rgba(232,168,79,0.05);display:flex;align-items:center;gap:10px">
+      <div onclick="window.open('https://discord.gg/AzW5aVNXky','_blank')" style="cursor:pointer;margin-bottom:16px;padding:10px 14px;border:1px solid rgba(232,168,79,0.3);background:rgba(232,168,79,0.05);display:flex;align-items:center;gap:10px">
         <div style="font-size:16px">🔔</div>
         <div>
           <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#e8a84f;letter-spacing:1px;text-transform:uppercase">Join our Discord for crew notifications</div>
-          <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#5a7a9a;letter-spacing:1px;margin-top:2px">discord.gg/fx9XvYnGmB — tap to join</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#5a7a9a;letter-spacing:1px;margin-top:2px">discord.gg/AzW5aVNXky — tap to join</div>
         </div>
       </div>
         <span class="filter-label">Mission:</span>
@@ -1296,6 +1296,8 @@
       }));
     } catch(e) {
       console.error('Load error:', e);
+      grid.innerHTML = '<div style="padding:40px;text-align:center;font-family:monospace;color:#e84f4f;letter-spacing:1px">[ CONNECTION ERROR — RETRY ]</div>';
+      return;
     }
     if (listings.length === 0) {
       grid.innerHTML = '';
@@ -1496,7 +1498,7 @@
       </div>
       <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-dim);letter-spacing:1px;margin-bottom:14px;padding:10px 12px;border:1px solid var(--border);background:var(--bg)">
         <div style="margin-bottom:8px">CONTACT: <span style="color:var(--accent)">@${l.discord || l.owner}</span></div>
-        <a href="https://discord.gg/fx9XvYnGmB" target="_blank" style="display:inline-block;padding:6px 12px;border:1px solid var(--accent);color:var(--accent);text-decoration:none;letter-spacing:1px;">JOIN CREWFIND DISCORD</a>
+        <a href="https://discord.gg/AzW5aVNXky" target="_blank" style="display:inline-block;padding:6px 12px;border:1px solid var(--accent);color:var(--accent);text-decoration:none;letter-spacing:1px;">JOIN CREWFIND DISCORD</a>
       </div>
       <button class="btn-post" id="btn-transmit" data-id="${id}" onclick="submitApply(this.dataset.id)">TRANSMIT APPLICATION</button>
     `;
@@ -1622,22 +1624,26 @@
 
   // Listen for auth state changes
   sb.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN' && session) {
+    if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') && session) {
       currentUser = session.user;
       const discordUsername = session.user.user_metadata?.full_name ||
                               session.user.user_metadata?.name ||
                               'PILOT';
       currentHandle = discordUsername.toUpperCase().replace(/\s+/g, '_');
       localStorage.setItem('rsi_handle', currentHandle);
+      localStorage.setItem('discord_username', session.user.user_metadata?.custom_claims?.global_name || discordUsername);
       document.getElementById('pilot-handle').textContent = currentHandle;
       document.getElementById('onboarding').style.display = 'none';
+      await renderListings();
+    } else if (event === 'INITIAL_SESSION' && !session) {
+      // No session on load — fall back to saved handle then render
+      await checkHandle();
       await renderListings();
     }
   });
 
-  // INIT
-  checkHandle();
-  renderListings().catch(e => console.error('Init error:', e));
+  // INIT — onAuthStateChange handles session restore + renderListings on load
+  // initShipSearch is UI-only, safe to call immediately
   initShipSearch();
 
   // listeners handled inline

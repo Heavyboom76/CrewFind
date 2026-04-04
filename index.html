@@ -299,12 +299,6 @@
   .mission-type.cargo  { color: var(--success); border-color: rgba(79,232,168,0.3); background: rgba(79,232,168,0.06); }
   .mission-type.patrol { color: var(--accent);  border-color: rgba(79,168,232,0.3); background: rgba(79,168,232,0.06); }
   .mission-type.explore { color: #b08fe8; border-color: rgba(176,143,232,0.3); background: rgba(176,143,232,0.06); }
-  .mission-type.mining { color: #e8c84f; border-color: rgba(232,200,79,0.3); background: rgba(232,200,79,0.06); }
-  .mission-type.salvage { color: #8fbce8; border-color: rgba(143,188,232,0.3); background: rgba(143,188,232,0.06); }
-  .mission-type.medical { color: #4fe88b; border-color: rgba(79,232,139,0.3); background: rgba(79,232,139,0.06); }
-  .mission-type.piracy { color: #e84f6a; border-color: rgba(232,79,106,0.3); background: rgba(232,79,106,0.06); }
-  .mission-type.escort { color: #8fe8d8; border-color: rgba(143,232,216,0.3); background: rgba(143,232,216,0.06); }
-  .mission-type.ground { color: #c8a878; border-color: rgba(200,168,120,0.3); background: rgba(200,168,120,0.06); }
 
   .card-owner {
     display: flex;
@@ -523,71 +517,8 @@
 
   .roles-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-  }
-
-  .role-counter {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 12px;
-    border: 1px solid var(--border);
-    transition: all 0.15s;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    color: var(--text-dim);
-  }
-
-  .role-counter.active {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: rgba(79,168,232,0.06);
-  }
-
-  .role-name {
-    flex: 1;
-  }
-
-  .role-controls {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-
-  .role-btn {
-    width: 24px;
-    height: 24px;
-    border: 1px solid var(--border);
-    background: var(--bg);
-    color: var(--text-dim);
-    font-size: 14px;
-    font-weight: bold;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.15s;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  .role-btn:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-  }
-
-  .role-btn:active {
-    background: rgba(79,168,232,0.1);
-  }
-
-  .role-count {
-    min-width: 20px;
-    text-align: center;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 12px;
-    color: var(--accent);
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
   }
 
   .role-check {
@@ -613,48 +544,6 @@
   }
 
   .role-check input { display: none; }
-
-  .ship-select-wrapper {
-    position: relative;
-  }
-
-  .ship-dropdown {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    max-height: 200px;
-    overflow-y: auto;
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-top: none;
-    z-index: 200;
-  }
-
-  .ship-dropdown.open {
-    display: block;
-  }
-
-  .ship-option {
-    padding: 8px 12px;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 11px;
-    color: var(--text);
-    cursor: pointer;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .ship-option:hover, .ship-option.selected {
-    background: rgba(79,168,232,0.1);
-    color: var(--accent);
-  }
-
-  .ship-option .manufacturer {
-    font-size: 9px;
-    color: var(--text-dim);
-    margin-left: 8px;
-  }
 
   .discord-row {
     display: flex;
@@ -791,19 +680,10 @@
   <div style="width:100%;max-width:400px;border:1px solid rgba(96,180,255,0.35);padding:32px;background:#0d1117;position:relative;">
     <div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,#4fa8e8,transparent)"></div>
     <div style="font-family:'Orbitron',monospace;font-size:14px;font-weight:700;color:#e8f4ff;letter-spacing:2px;margin-bottom:8px;text-transform:uppercase">// Welcome to CrewFind</div>
-    <div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:#5a7a9a;letter-spacing:1px;margin-bottom:24px">Sign in with Discord to get started</div>
-    
-    <!-- Discord login button -->
-    <button onclick="signInWithDiscord()" style="width:100%;padding:14px;background:#5865F2;border:none;color:#fff;font-family:'Orbitron',monospace;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px;">
-      <svg width="20" height="20" viewBox="0 0 71 55" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M60.1 4.9A58.5 58.5 0 0 0 45.5.9a.2.2 0 0 0-.2.1 40.8 40.8 0 0 0-1.8 3.7 54 54 0 0 0-16.2 0 37.4 37.4 0 0 0-1.8-3.7.2.2 0 0 0-.2-.1A58.3 58.3 0 0 0 10.8 4.9a.2.2 0 0 0-.1.1C1.6 18.1-.9 31 .3 43.7a.2.2 0 0 0 .1.2 58.8 58.8 0 0 0 17.7 8.9.2.2 0 0 0 .2-.1 42 42 0 0 0 3.6-5.9.2.2 0 0 0-.1-.3 38.7 38.7 0 0 1-5.5-2.6.2.2 0 0 1 0-.4l1.1-.8a.2.2 0 0 1 .2 0c11.5 5.3 24 5.3 35.4 0a.2.2 0 0 1 .2 0l1.1.8a.2.2 0 0 1 0 .4 36.1 36.1 0 0 1-5.5 2.6.2.2 0 0 0-.1.3 47.1 47.1 0 0 0 3.6 5.9.2.2 0 0 0 .2.1 58.6 58.6 0 0 0 17.8-8.9.2.2 0 0 0 .1-.2c1.4-14.8-2.4-27.6-10.4-39a.2.2 0 0 0-.1 0ZM23.7 36.2c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2c3.6 0 6.5 3.3 6.4 7.2 0 4-2.8 7.2-6.4 7.2Zm23.6 0c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2c3.6 0 6.5 3.3 6.4 7.2 0 4-2.8 7.2-6.4 7.2Z" fill="white"/></svg>
-      Sign in with Discord
-    </button>
-
-    <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#5a7a9a;letter-spacing:1px;text-align:center;margin-bottom:16px">— or continue without Discord —</div>
-
+    <div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:#5a7a9a;letter-spacing:1px;margin-bottom:28px">Enter your RSI handle to get started</div>
     <div style="font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#5a7a9a;margin-bottom:8px">RSI Handle</div>
-    <input id="onboard-handle" class="form-input" placeholder="e.g. VANGUARD_7" style="margin-bottom:12px;text-transform:uppercase" oninput="this.value=this.value.toUpperCase()"/>
-    <button onclick="saveHandle()" style="width:100%;padding:12px;background:transparent;border:1px solid rgba(96,180,255,0.35);color:#4fa8e8;font-family:'Orbitron',monospace;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;cursor:pointer;">ENTER THE VERSE</button>
+    <input id="onboard-handle" class="form-input" placeholder="e.g. VANGUARD_7" style="margin-bottom:20px;text-transform:uppercase" oninput="this.value=this.value.toUpperCase()"/>
+    <button onclick="saveHandle()" style="width:100%;padding:12px;background:#4fa8e8;border:none;color:#07090f;font-family:'Orbitron',monospace;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;cursor:pointer;">ENTER THE VERSE</button>
   </div>
 </div>
 
@@ -834,26 +714,13 @@
         <div class="hud-stat">STATUS: <b style="color:var(--success)">ONLINE</b></div>
       </div>
 
-      <!-- Discord banner -->
-      <div onclick="window.open('https://discord.gg/NyRpTt5tH3','_blank')" style="cursor:pointer;margin-bottom:16px;padding:10px 14px;border:1px solid rgba(232,168,79,0.3);background:rgba(232,168,79,0.05);display:flex;align-items:center;gap:10px">
-        <div style="font-size:16px">🔔</div>
-        <div>
-          <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#e8a84f;letter-spacing:1px;text-transform:uppercase">Join our Discord for crew notifications</div>
-          <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#5a7a9a;letter-spacing:1px;margin-top:2px">discord.gg/NyRpTt5tH3 — tap to join</div>
-        </div>
-      </div>
+      <div class="filters">
         <span class="filter-label">Mission:</span>
         <button class="filter-chip active" id="fc-all" onclick="filterBy('all', this)">All</button>
         <button class="filter-chip" id="fc-bounty" onclick="filterBy('bounty', this)">Bounty</button>
         <button class="filter-chip" id="fc-cargo" onclick="filterBy('cargo', this)">Cargo</button>
         <button class="filter-chip" id="fc-patrol" onclick="filterBy('patrol', this)">Patrol</button>
         <button class="filter-chip" id="fc-explore" onclick="filterBy('explore', this)">Explore</button>
-        <button class="filter-chip" id="fc-mining" onclick="filterBy('mining', this)">Mining</button>
-        <button class="filter-chip" id="fc-salvage" onclick="filterBy('salvage', this)">Salvage</button>
-        <button class="filter-chip" id="fc-medical" onclick="filterBy('medical', this)">Medical</button>
-        <button class="filter-chip" id="fc-piracy" onclick="filterBy('piracy', this)">PvP</button>
-        <button class="filter-chip" id="fc-escort" onclick="filterBy('escort', this)">Escort</button>
-        <button class="filter-chip" id="fc-ground" onclick="filterBy('ground', this)">Ground</button>
       </div>
 
       <div class="listings" id="listings-grid"></div>
@@ -881,11 +748,7 @@
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">Ship</label>
-        <div class="ship-select-wrapper">
-          <input class="form-input" id="f-ship-search" placeholder="Search ships..." autocomplete="off" />
-          <div class="ship-dropdown" id="ship-dropdown"></div>
-          <input type="hidden" id="f-ship" />
-        </div>
+        <input class="form-input" id="f-ship" placeholder="e.g. Hammerhead" />
       </div>
       <div class="form-group">
         <label class="form-label">Mission Type</label>
@@ -894,112 +757,32 @@
           <option value="cargo">Cargo Run</option>
           <option value="patrol">Patrol</option>
           <option value="explore">Exploration</option>
-          <option value="mining">Mining</option>
-          <option value="salvage">Salvage</option>
-          <option value="medical">Medical/Rescue</option>
-          <option value="piracy">PvP/Piracy</option>
-          <option value="escort">Escort</option>
-          <option value="ground">Ground Combat</option>
         </select>
       </div>
     </div>
 
     <div class="form-group">
-      <label class="form-label">Roles Needed (tap to add, up to 8 each)</label>
+      <label class="form-label">Roles Needed</label>
       <div class="roles-grid" id="roles-grid">
-        <div class="role-counter" data-value="Gunner">
-          <span class="role-name">Gunner</span>
-          <div class="role-controls">
-            <button type="button" class="role-btn" onclick="adjustRole(this, -1)">−</button>
-            <span class="role-count">0</span>
-            <button type="button" class="role-btn" onclick="adjustRole(this, 1)">+</button>
-          </div>
-        </div>
-        <div class="role-counter" data-value="Co-Pilot">
-          <span class="role-name">Co-Pilot</span>
-          <div class="role-controls">
-            <button type="button" class="role-btn" onclick="adjustRole(this, -1)">−</button>
-            <span class="role-count">0</span>
-            <button type="button" class="role-btn" onclick="adjustRole(this, 1)">+</button>
-          </div>
-        </div>
-        <div class="role-counter" data-value="Engineer">
-          <span class="role-name">Engineer</span>
-          <div class="role-controls">
-            <button type="button" class="role-btn" onclick="adjustRole(this, -1)">−</button>
-            <span class="role-count">0</span>
-            <button type="button" class="role-btn" onclick="adjustRole(this, 1)">+</button>
-          </div>
-        </div>
-        <div class="role-counter" data-value="Medic">
-          <span class="role-name">Medic</span>
-          <div class="role-controls">
-            <button type="button" class="role-btn" onclick="adjustRole(this, -1)">−</button>
-            <span class="role-count">0</span>
-            <button type="button" class="role-btn" onclick="adjustRole(this, 1)">+</button>
-          </div>
-        </div>
-        <div class="role-counter" data-value="Cargo Op">
-          <span class="role-name">Cargo Op</span>
-          <div class="role-controls">
-            <button type="button" class="role-btn" onclick="adjustRole(this, -1)">−</button>
-            <span class="role-count">0</span>
-            <button type="button" class="role-btn" onclick="adjustRole(this, 1)">+</button>
-          </div>
-        </div>
-        <div class="role-counter" data-value="Boarding">
-          <span class="role-name">Boarding</span>
-          <div class="role-controls">
-            <button type="button" class="role-btn" onclick="adjustRole(this, -1)">−</button>
-            <span class="role-count">0</span>
-            <button type="button" class="role-btn" onclick="adjustRole(this, 1)">+</button>
-          </div>
-        </div>
-        <div class="role-counter" data-value="Mining">
-          <span class="role-name">Mining</span>
-          <div class="role-controls">
-            <button type="button" class="role-btn" onclick="adjustRole(this, -1)">−</button>
-            <span class="role-count">0</span>
-            <button type="button" class="role-btn" onclick="adjustRole(this, 1)">+</button>
-          </div>
-        </div>
-        <div class="role-counter" data-value="Salvage">
-          <span class="role-name">Salvage</span>
-          <div class="role-controls">
-            <button type="button" class="role-btn" onclick="adjustRole(this, -1)">−</button>
-            <span class="role-count">0</span>
-            <button type="button" class="role-btn" onclick="adjustRole(this, 1)">+</button>
-          </div>
-        </div>
-        <div class="role-counter" data-value="Security">
-          <span class="role-name">Security</span>
-          <div class="role-controls">
-            <button type="button" class="role-btn" onclick="adjustRole(this, -1)">−</button>
-            <span class="role-count">0</span>
-            <button type="button" class="role-btn" onclick="adjustRole(this, 1)">+</button>
-          </div>
-        </div>
-        <div class="role-counter" data-value="Privateer">
-          <span class="role-name">Privateer</span>
-          <div class="role-controls">
-            <button type="button" class="role-btn" onclick="adjustRole(this, -1)">−</button>
-            <span class="role-count">0</span>
-            <button type="button" class="role-btn" onclick="adjustRole(this, 1)">+</button>
-          </div>
-        </div>
+        <div class="role-check" data-value="Gunner" onclick="toggleRole(this)">Gunner</div>
+        <div class="role-check" data-value="Co-Pilot" onclick="toggleRole(this)">Co-Pilot</div>
+        <div class="role-check" data-value="Engineer" onclick="toggleRole(this)">Engineer</div>
+        <div class="role-check" data-value="Medic" onclick="toggleRole(this)">Medic</div>
+        <div class="role-check" data-value="Cargo Op" onclick="toggleRole(this)">Cargo Op</div>
+        <div class="role-check" data-value="Boarding" onclick="toggleRole(this)">Boarding</div>
       </div>
     </div>
 
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label">System</label>
-        <select class="form-select" id="f-system">
-          <option value="Stanton">Stanton</option>
-          <option value="Pyro">Pyro</option>
-          <option value="Nyx">Nyx</option>
-          <option value="Terra">Terra</option>
-          <option value="Magnus">Magnus</option>
-          <option value="Any">Any System</option>
+        <label class="form-label">Timezone</label>
+        <select class="form-select" id="f-tz">
+          <option>UTC-8 (PST)</option>
+          <option>UTC-5 (EST)</option>
+          <option selected>UTC+0 (GMT)</option>
+          <option>UTC+1 (CET)</option>
+          <option>UTC+8 (SGT)</option>
+          <option>UTC+10 (AEST)</option>
         </select>
       </div>
       <div class="form-group">
@@ -1013,10 +796,10 @@
     </div>
 
     <div class="form-group">
-      <label class="form-label">Your Discord Username</label>
+      <label class="form-label">Discord Handle</label>
       <div class="discord-row">
-        <span class="discord-prefix">@</span>
-        <input class="form-input" id="f-discord" placeholder="your_discord_username" style="border-left:none" />
+        <span class="discord-prefix">discord.gg/</span>
+        <input class="form-input" id="f-discord" placeholder="your_handle" style="border-left:none" />
       </div>
     </div>
 
@@ -1040,150 +823,12 @@
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNmb3psZ3RoZ3ZwaGtudHhiaGduIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5MDA5MzAsImV4cCI6MjA4OTQ3NjkzMH0.aPPT8O29hEQKw3uf29FWSyyBJxv1GT7_YtF83dRx2n4';
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  // Star Citizen Multi-Crew Ships (Flight Ready, 2+ crew)
-  const SHIPS = [
-    // Origin Jumpworks
-    { name: '400i', manufacturer: 'Origin' },
-    { name: '600i Explorer', manufacturer: 'Origin' },
-    { name: '600i Touring', manufacturer: 'Origin' },
-    { name: '890 Jump', manufacturer: 'Origin' },
-    // Aegis Dynamics
-    { name: 'Hammerhead', manufacturer: 'Aegis' },
-    { name: 'Idris-M', manufacturer: 'Aegis' },
-    { name: 'Idris-P', manufacturer: 'Aegis' },
-    { name: 'Reclaimer', manufacturer: 'Aegis' },
-    { name: 'Redeemer', manufacturer: 'Aegis' },
-    { name: 'Retaliator Bomber', manufacturer: 'Aegis' },
-    { name: 'Vanguard Harbinger', manufacturer: 'Aegis' },
-    { name: 'Vanguard Hoplite', manufacturer: 'Aegis' },
-    { name: 'Vanguard Sentinel', manufacturer: 'Aegis' },
-    { name: 'Vanguard Warden', manufacturer: 'Aegis' },
-    // Anvil Aerospace
-    { name: 'C8 Pisces', manufacturer: 'Anvil' },
-    { name: 'C8R Pisces Rescue', manufacturer: 'Anvil' },
-    { name: 'Carrack', manufacturer: 'Anvil' },
-    { name: 'F7C-M Super Hornet', manufacturer: 'Anvil' },
-    { name: 'Gladiator', manufacturer: 'Anvil' },
-    { name: 'Hurricane', manufacturer: 'Anvil' },
-    { name: 'Valkyrie', manufacturer: 'Anvil' },
-    // RSI
-    { name: 'Constellation Andromeda', manufacturer: 'RSI' },
-    { name: 'Constellation Aquila', manufacturer: 'RSI' },
-    { name: 'Constellation Phoenix', manufacturer: 'RSI' },
-    { name: 'Constellation Taurus', manufacturer: 'RSI' },
-    { name: 'Perseus', manufacturer: 'RSI' },
-    { name: 'Polaris', manufacturer: 'RSI' },
-    { name: 'Scorpius', manufacturer: 'RSI' },
-    // Drake Interplanetary
-    { name: 'Caterpillar', manufacturer: 'Drake' },
-    { name: 'Corsair', manufacturer: 'Drake' },
-    { name: 'Cutlass Black', manufacturer: 'Drake' },
-    { name: 'Cutlass Blue', manufacturer: 'Drake' },
-    { name: 'Cutlass Red', manufacturer: 'Drake' },
-    // MISC
-    { name: 'Freelancer', manufacturer: 'MISC' },
-    { name: 'Freelancer DUR', manufacturer: 'MISC' },
-    { name: 'Freelancer MAX', manufacturer: 'MISC' },
-    { name: 'Freelancer MIS', manufacturer: 'MISC' },
-    { name: 'Reliant Kore', manufacturer: 'MISC' },
-    { name: 'Reliant Mako', manufacturer: 'MISC' },
-    { name: 'Reliant Sen', manufacturer: 'MISC' },
-    { name: 'Reliant Tana', manufacturer: 'MISC' },
-    { name: 'Starfarer', manufacturer: 'MISC' },
-    { name: 'Starfarer Gemini', manufacturer: 'MISC' },
-    // Crusader Industries
-    { name: 'A2 Hercules', manufacturer: 'Crusader' },
-    { name: 'C2 Hercules', manufacturer: 'Crusader' },
-    { name: 'M2 Hercules', manufacturer: 'Crusader' },
-    { name: 'Mercury Star Runner', manufacturer: 'Crusader' },
-    // Argo Astronautics
-    { name: 'MOLE', manufacturer: 'Argo' },
-    // Esperia (Alien Replicas)
-    { name: 'Prowler', manufacturer: 'Esperia' },
-    // Banu
-    { name: 'Defender', manufacturer: 'Banu' },
-  ].sort((a, b) => a.name.localeCompare(b.name));
-
-  // Ship search functionality
-  let selectedShipIndex = -1;
-  
-  function initShipSearch() {
-    const searchInput = document.getElementById('f-ship-search');
-    const dropdown = document.getElementById('ship-dropdown');
-    const hiddenInput = document.getElementById('f-ship');
-    
-    searchInput.addEventListener('focus', () => {
-      renderShipDropdown(searchInput.value);
-      dropdown.classList.add('open');
-    });
-    
-    searchInput.addEventListener('input', (e) => {
-      renderShipDropdown(e.target.value);
-      dropdown.classList.add('open');
-      selectedShipIndex = -1;
-    });
-    
-    searchInput.addEventListener('blur', () => {
-      setTimeout(() => dropdown.classList.remove('open'), 150);
-    });
-    
-    searchInput.addEventListener('keydown', (e) => {
-      const options = dropdown.querySelectorAll('.ship-option');
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        selectedShipIndex = Math.min(selectedShipIndex + 1, options.length - 1);
-        updateShipSelection(options);
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        selectedShipIndex = Math.max(selectedShipIndex - 1, 0);
-        updateShipSelection(options);
-      } else if (e.key === 'Enter' && selectedShipIndex >= 0) {
-        e.preventDefault();
-        options[selectedShipIndex].click();
-      }
-    });
-  }
-  
-  function updateShipSelection(options) {
-    options.forEach((opt, i) => {
-      opt.classList.toggle('selected', i === selectedShipIndex);
-      if (i === selectedShipIndex) opt.scrollIntoView({ block: 'nearest' });
-    });
-  }
-  
-  function renderShipDropdown(query) {
-    const dropdown = document.getElementById('ship-dropdown');
-    const q = query.toLowerCase();
-    const filtered = SHIPS.filter(s => 
-      s.name.toLowerCase().includes(q) || 
-      s.manufacturer.toLowerCase().includes(q)
-    );
-    
-    dropdown.innerHTML = filtered.map(s => `
-      <div class="ship-option" onclick="selectShip('${s.name.replace(/'/g, "\\'")}')">
-        ${s.name}<span class="manufacturer">${s.manufacturer}</span>
-      </div>
-    `).join('');
-  }
-  
-  function selectShip(name) {
-    document.getElementById('f-ship-search').value = name;
-    document.getElementById('f-ship').value = name;
-    document.getElementById('ship-dropdown').classList.remove('open');
-  }
-
   const ROLES_ALL = ['Gunner','Co-Pilot','Engineer','Medic','Cargo Op','Boarding'];
 
   let activeFilter = 'all';
   let currentTab = 'browse';
   let applyTarget = null;
-  
-  // Load applied IDs from localStorage
-  let appliedIds = new Set(JSON.parse(localStorage.getItem('appliedIds') || '[]'));
-  
-  function saveAppliedIds() {
-    localStorage.setItem('appliedIds', JSON.stringify([...appliedIds]));
-  }
+  let appliedIds = new Set();
 
   const listings = [
   ];
@@ -1191,35 +836,18 @@
   let myPosts = [];
 
   function missionColor(m) {
-    const map = { 
-      bounty:'bounty', cargo:'cargo', patrol:'patrol', explore:'explore',
-      mining:'mining', salvage:'salvage', medical:'medical', 
-      piracy:'piracy', escort:'escort', ground:'ground'
-    };
+    const map = { bounty:'bounty', cargo:'cargo', patrol:'patrol', explore:'explore' };
     return map[m] || 'patrol';
   }
 
   function missionLabel(m) {
-    const map = { 
-      bounty:'Bounty Hunt', cargo:'Cargo Run', patrol:'Patrol', explore:'Exploration',
-      mining:'Mining', salvage:'Salvage', medical:'Medical/Rescue',
-      piracy:'PvP/Piracy', escort:'Escort', ground:'Ground Combat'
-    };
+    const map = { bounty:'Bounty Hunt', cargo:'Cargo Run', patrol:'Patrol', explore:'Explore' };
     return map[m] || m;
-  }
-
-  function groupRoles(roles) {
-    const counts = {};
-    roles.forEach(r => { counts[r] = (counts[r] || 0) + 1; });
-    return Object.entries(counts).map(([role, count]) => 
-      count > 1 ? `${role} ×${count}` : role
-    );
   }
 
   function renderCard(l, isMine) {
     const applied = l.applied;
     isMine = isMine || (currentHandle && l.owner && l.owner.toUpperCase() === currentHandle.toUpperCase());
-    const groupedRoles = groupRoles(l.roles);
     return `
     <div class="card" style="animation-delay:${Math.random()*0.2}s">
       <div class="card-header">
@@ -1230,12 +858,12 @@
         <div class="owner-avatar">${l.owner.slice(0,2)}</div>
         <div class="owner-info">
           <div class="owner-handle">${l.owner}</div>
-          <div class="owner-meta">${l.timezone || l.tz || ''} &nbsp;·&nbsp; ${l.playstyle || l.style || ''}</div>
+          <div class="owner-meta">${l.tz} &nbsp;·&nbsp; ${l.style}</div>
         </div>
       </div>
       <div class="card-roles">
         <span style="font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--text-dim);text-transform:uppercase;line-height:26px;margin-right:4px">NEEDS:</span>
-        ${groupedRoles.map(r => `<span class="role-tag needed">${r}</span>`).join('')}
+        ${l.roles.map(r => `<span class="role-tag needed">${r}</span>`).join('')}
       </div>
       <div class="card-footer">
         <div class="card-meta">
@@ -1341,12 +969,6 @@
 
   // POST MODAL
   function openPostModal() {
-    // Auto-fill Discord username from login
-    const discordField = document.getElementById('f-discord');
-    const savedDiscord = localStorage.getItem('discord_username') || '';
-    if (discordField && savedDiscord && !discordField.value) {
-      discordField.value = savedDiscord;
-    }
     document.getElementById('post-modal').classList.add('open');
     document.body.style.overflow = 'hidden';
   }
@@ -1369,19 +991,6 @@
     }
   }
 
-  function adjustRole(btn, delta) {
-    const container = btn.closest('.role-counter');
-    const countEl = container.querySelector('.role-count');
-    let count = parseInt(countEl.textContent) || 0;
-    count = Math.max(0, Math.min(8, count + delta));
-    countEl.textContent = count;
-    if (count > 0) {
-      container.classList.add('active');
-    } else {
-      container.classList.remove('active');
-    }
-  }
-
   function toggleRole(el) {
     el.classList.toggle('selected');
   }
@@ -1389,41 +998,25 @@
   async function submitPost() {
     const ship = document.getElementById('f-ship').value.trim();
     if (!ship) { showToast('// ERROR: Ship name required'); return; }
-    
-    // Build roles array from counters (e.g., 3 Gunners = ["Gunner", "Gunner", "Gunner"])
-    const roles = [];
-    document.querySelectorAll('#roles-grid .role-counter').forEach(el => {
-      const roleName = el.dataset.value;
-      const count = parseInt(el.querySelector('.role-count').textContent) || 0;
-      for (let i = 0; i < count; i++) {
-        roles.push(roleName);
-      }
-    });
-    
+    const roles = [...document.querySelectorAll('#roles-grid .role-check.selected')].map(el => el.dataset.value);
     if (roles.length === 0) { showToast('// ERROR: Select at least one role'); return; }
     const mission = document.getElementById('f-mission').value;
-    const system = document.getElementById('f-system').value;
+    const tz = document.getElementById('f-tz').value.split(' ')[0];
     const style = document.getElementById('f-style').value;
     const discord = document.getElementById('f-discord').value.trim() || 'N/A';
     const owner = currentHandle || 'PILOT';
-    const discordUser = currentUser ? (currentUser.user_metadata?.custom_claims?.global_name || currentUser.user_metadata?.full_name || '') : (localStorage.getItem('discord_username') || '');
     const btn = document.getElementById('btn-submit-post');
     btn.textContent = 'TRANSMITTING...';
     btn.disabled = true;
     try {
       const { data, error } = await sb.from('listings').insert([{
-        ship, mission, owner, timezone: system, playstyle: style, roles: roles.join(','), discord, owner_discord: document.getElementById('f-discord').value.trim() || discordUser, expires_at: new Date(Date.now() + 48*60*60*1000).toISOString()
+        ship, mission, owner, timezone: tz, playstyle: style, roles: roles.join(','), discord, expires_at: new Date(Date.now() + 48*60*60*1000).toISOString()
       }]).select();
       if (error) throw error;
       document.getElementById('f-ship').value = '';
-      document.getElementById('f-ship-search').value = '';
       document.getElementById('f-discord').value = '';
       if (document.getElementById('f-owner')) document.getElementById('f-owner').value = '';
-      // Reset role counters
-      document.querySelectorAll('#roles-grid .role-counter').forEach(el => {
-        el.querySelector('.role-count').textContent = '0';
-        el.classList.remove('active');
-      });
+      document.querySelectorAll('#roles-grid .role-check').forEach(el => el.classList.remove('selected'));
       closePostModal();
       await renderListings();
       showToast('// LISTING BROADCAST TO SECTOR');
@@ -1441,9 +1034,6 @@
     const l = listings.find(x => x.id === id);
     if (!l) return;
     applyTarget = l;
-    const savedDiscord = localStorage.getItem('discord_username') || '';
-    const groupedRoles = groupRoles(l.roles);
-    const uniqueRoles = [...new Set(l.roles)];
     document.getElementById('apply-modal-title').textContent = `// Apply — ${l.ship.toUpperCase()}`;
     document.getElementById('apply-modal-body').innerHTML = `
       <div style="margin-bottom:18px;padding:14px;border:1px solid var(--border);background:var(--bg)">
@@ -1452,25 +1042,24 @@
           <div class="hud-stat">MISSION: <b>${missionLabel(l.mission)}</b></div>
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap">
-          ${groupedRoles.map(r=>`<span class="role-tag needed">${r}</span>`).join('')}
+          ${l.roles.map(r=>`<span class="role-tag needed">${r}</span>`).join('')}
         </div>
       </div>
       <div class="form-group">
         <label class="form-label">Your Role</label>
         <select class="form-select" id="apply-role">
-          ${uniqueRoles.map((r,i)=>`<option value="${r}">${r}</option>`).join('')}
+          ${l.roles.map((r,i)=>`<option value="${r}">${r}</option>`).join('')}
         </select>
       </div>
       <div class="form-group">
         <label class="form-label">Your Discord</label>
         <div class="discord-row">
           <span class="discord-prefix">@</span>
-          <input class="form-input" id="apply-discord" placeholder="your_handle#0000" style="border-left:none" value="${savedDiscord}"/>
+          <input class="form-input" id="apply-discord" placeholder="your_handle#0000" style="border-left:none"/>
         </div>
       </div>
       <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-dim);letter-spacing:1px;margin-bottom:14px;padding:10px 12px;border:1px solid var(--border);background:var(--bg)">
-        <div style="margin-bottom:8px">CONTACT: <span style="color:var(--accent)">@${l.discord || l.owner}</span></div>
-        <a href="https://discord.gg/NyRpTt5tH3" target="_blank" style="display:inline-block;padding:6px 12px;border:1px solid var(--accent);color:var(--accent);text-decoration:none;letter-spacing:1px;">JOIN CREWFIND DISCORD</a>
+        CONTACT: discord.gg/${l.discord}
       </div>
       <button class="btn-post" id="btn-transmit" data-id="${id}" onclick="submitApply(this.dataset.id)">TRANSMIT APPLICATION</button>
     `;
@@ -1517,7 +1106,6 @@
       console.error('Discord notify error:', e);
     }
     appliedIds.add(id);
-    saveAppliedIds();
     closeApplyModal();
     await renderListings();
     showToast('// APPLICATION TRANSMITTED');
@@ -1532,27 +1120,6 @@
 
   // HANDLE / IDENTITY
   var currentHandle = '';
-  var currentUser = null;
-
-  async function signInWithDiscord() {
-    const { error } = await sb.auth.signInWithOAuth({
-      provider: 'discord',
-      options: {
-        redirectTo: 'https://crewfindapp.netlify.app',
-        scopes: 'identify'
-      }
-    });
-    if (error) { console.error('Discord login error:', error); showToast('// ERROR: Could not connect to Discord'); }
-  }
-
-  async function signOut() {
-    await sb.auth.signOut();
-    currentHandle = '';
-    currentUser = null;
-    localStorage.removeItem('rsi_handle');
-    document.getElementById('pilot-handle').textContent = '---';
-    document.getElementById('onboarding').style.display = 'flex';
-  }
 
   function saveHandle() {
     var h = document.getElementById('onboard-handle').value.trim().toUpperCase();
@@ -1564,26 +1131,14 @@
   }
 
   function changeHandle() {
-    if (confirm('Sign out?')) { signOut(); }
+    if (confirm('Change your RSI handle?')) {
+      localStorage.removeItem('rsi_handle');
+      document.getElementById('onboarding').style.display = 'flex';
+      document.getElementById('onboard-handle').value = currentHandle;
+    }
   }
 
-  async function checkHandle() {
-    // Check for existing Supabase session first
-    const { data: { session } } = await sb.auth.getSession();
-    if (session && session.user) {
-      currentUser = session.user;
-      const discordUsername = session.user.user_metadata?.full_name || 
-                              session.user.user_metadata?.name ||
-                              session.user.email?.split('@')[0] || 
-                              'PILOT';
-      currentHandle = discordUsername.toUpperCase().replace(/\s+/g, '_');
-      localStorage.setItem('rsi_handle', currentHandle);
-      localStorage.setItem('discord_username', session.user.user_metadata?.custom_claims?.global_name || discordUsername);
-      document.getElementById('pilot-handle').textContent = currentHandle;
-      document.getElementById('onboarding').style.display = 'none';
-      return;
-    }
-    // Fall back to saved RSI handle
+  function checkHandle() {
     var saved = localStorage.getItem('rsi_handle');
     if (saved) {
       currentHandle = saved;
@@ -1594,25 +1149,9 @@
     }
   }
 
-  // Listen for auth state changes
-  sb.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN' && session) {
-      currentUser = session.user;
-      const discordUsername = session.user.user_metadata?.full_name ||
-                              session.user.user_metadata?.name ||
-                              'PILOT';
-      currentHandle = discordUsername.toUpperCase().replace(/\s+/g, '_');
-      localStorage.setItem('rsi_handle', currentHandle);
-      document.getElementById('pilot-handle').textContent = currentHandle;
-      document.getElementById('onboarding').style.display = 'none';
-      await renderListings();
-    }
-  });
-
   // INIT
   checkHandle();
   renderListings().catch(e => console.error('Init error:', e));
-  initShipSearch();
 
   // listeners handled inline
 </script>
