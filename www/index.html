@@ -1651,6 +1651,26 @@
     );
   }
 
+  function copyDiscord(handle) {
+    const text = handle.startsWith('@') ? handle : '@' + handle;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('discord-copy-btn');
+      if (btn) {
+        btn.textContent = '✓ COPIED — PASTE INTO DISCORD SEARCH';
+        btn.style.color = 'var(--success)';
+        btn.style.borderColor = 'var(--success)';
+        setTimeout(() => {
+          btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 71 55" fill="none"><path d="M60.1 4.9A58.5 58.5 0 0 0 45.5.9a.2.2 0 0 0-.2.1 40.8 40.8 0 0 0-1.8 3.7 54 54 0 0 0-16.2 0 37.4 37.4 0 0 0-1.8-3.7.2.2 0 0 0-.2-.1A58.3 58.3 0 0 0 10.8 4.9a.2.2 0 0 0-.1.1C1.6 18.1-.9 31 .3 43.7a.2.2 0 0 0 .1.2 58.8 58.8 0 0 0 17.7 8.9.2.2 0 0 0 .2-.1 42 42 0 0 0 3.6-5.9.2.2 0 0 0-.1-.3 38.7 38.7 0 0 1-5.5-2.6.2.2 0 0 1 0-.4l1.1-.8a.2.2 0 0 1 .2 0c11.5 5.3 24 5.3 35.4 0a.2.2 0 0 1 .2 0l1.1.8a.2.2 0 0 1 0 .4 36.1 36.1 0 0 1-5.5 2.6.2.2 0 0 0-.1.3 47.1 47.1 0 0 0 3.6 5.9.2.2 0 0 0 .2.1 58.6 58.6 0 0 0 17.8-8.9.2.2 0 0 0 .1-.2c1.4-14.8-2.4-27.6-10.4-39a.2.2 0 0 0-.1 0ZM23.7 36.2c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2c3.6 0 6.5 3.3 6.4 7.2 0 4-2.8 7.2-6.4 7.2Zm23.6 0c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2c3.6 0 6.5 3.3 6.4 7.2 0 4-2.8 7.2-6.4 7.2Z" fill="#5865F2"/></svg> COPY DISCORD TAG — ${text}`;
+          btn.style.color = '#5865F2';
+          btn.style.borderColor = '#5865F2';
+        }, 2500);
+      }
+      showToast('// DISCORD TAG COPIED TO CLIPBOARD');
+    }).catch(() => {
+      showToast('// ' + text + ' — COPY MANUALLY');
+    });
+  }
+
   function expiryCountdown(expires_at) {
     if (!expires_at) return '';
     const diff = new Date(expires_at) - new Date();
@@ -2062,11 +2082,10 @@
     const savedDiscord = localStorage.getItem('discord_username') || '';
     const isSolo = l.post_type === 'lfg' || l.post_type === 'lfm';
     const contactHandle = l.discord || l.owner;
-    const dmUrl = `https://discord.com/users/@${encodeURIComponent(contactHandle)}`;
-    const discordBtn = `<a href="javascript:void(0)" onclick="openExternalUrl('${dmUrl}')" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid #5865F2;color:#5865F2;text-decoration:none;letter-spacing:1px;font-family:'Share Tech Mono',monospace;font-size:10px;margin-bottom:8px;width:100%;justify-content:center;">
+    const discordBtn = `<button onclick="copyDiscord('${contactHandle}')" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid #5865F2;color:#5865F2;background:transparent;cursor:pointer;letter-spacing:1px;font-family:'Share Tech Mono',monospace;font-size:10px;margin-bottom:8px;width:100%;justify-content:center;-webkit-tap-highlight-color:transparent;" id="discord-copy-btn">
       <svg width="14" height="14" viewBox="0 0 71 55" fill="none"><path d="M60.1 4.9A58.5 58.5 0 0 0 45.5.9a.2.2 0 0 0-.2.1 40.8 40.8 0 0 0-1.8 3.7 54 54 0 0 0-16.2 0 37.4 37.4 0 0 0-1.8-3.7.2.2 0 0 0-.2-.1A58.3 58.3 0 0 0 10.8 4.9a.2.2 0 0 0-.1.1C1.6 18.1-.9 31 .3 43.7a.2.2 0 0 0 .1.2 58.8 58.8 0 0 0 17.7 8.9.2.2 0 0 0 .2-.1 42 42 0 0 0 3.6-5.9.2.2 0 0 0-.1-.3 38.7 38.7 0 0 1-5.5-2.6.2.2 0 0 1 0-.4l1.1-.8a.2.2 0 0 1 .2 0c11.5 5.3 24 5.3 35.4 0a.2.2 0 0 1 .2 0l1.1.8a.2.2 0 0 1 0 .4 36.1 36.1 0 0 1-5.5 2.6.2.2 0 0 0-.1.3 47.1 47.1 0 0 0 3.6 5.9.2.2 0 0 0 .2.1 58.6 58.6 0 0 0 17.8-8.9.2.2 0 0 0 .1-.2c1.4-14.8-2.4-27.6-10.4-39a.2.2 0 0 0-.1 0ZM23.7 36.2c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2c3.6 0 6.5 3.3 6.4 7.2 0 4-2.8 7.2-6.4 7.2Zm23.6 0c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2c3.6 0 6.5 3.3 6.4 7.2 0 4-2.8 7.2-6.4 7.2Z" fill="#5865F2"/></svg>
-      MESSAGE @${contactHandle} ON DISCORD
-    </a>`;
+      COPY DISCORD TAG — @${contactHandle}
+    </button>`;
 
     if (isSolo) {
       document.getElementById('apply-modal-title').textContent = l.post_type === 'lfg' ? '// Contact Pilot — LFG' : '// Contact Pilot — LFM Solo';
