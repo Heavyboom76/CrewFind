@@ -807,6 +807,102 @@
     opacity: 1;
     transform: translateY(0);
   }
+
+  /* SOLO / LFG CARD STYLES */
+  .card.solo-lfg {
+    border-color: rgba(79,232,168,0.25);
+    background: linear-gradient(135deg, var(--bg2) 0%, rgba(79,232,168,0.03) 100%);
+  }
+  .card.solo-lfg::before {
+    background: linear-gradient(90deg, transparent, var(--success), transparent);
+  }
+  .card.solo-lfg:hover {
+    border-color: rgba(79,232,168,0.5);
+  }
+  .card.solo-lfm {
+    border-color: rgba(176,143,232,0.25);
+    background: linear-gradient(135deg, var(--bg2) 0%, rgba(176,143,232,0.03) 100%);
+  }
+  .card.solo-lfm::before {
+    background: linear-gradient(90deg, transparent, #b08fe8, transparent);
+  }
+  .card.solo-lfm:hover {
+    border-color: rgba(176,143,232,0.5);
+  }
+
+  .solo-badge {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border: 1px solid;
+  }
+  .solo-badge.lfg {
+    color: var(--success);
+    border-color: rgba(79,232,168,0.4);
+    background: rgba(79,232,168,0.07);
+  }
+  .solo-badge.lfm {
+    color: #b08fe8;
+    border-color: rgba(176,143,232,0.4);
+    background: rgba(176,143,232,0.07);
+  }
+
+  .solo-note {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.5px;
+    margin-bottom: 14px;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    font-style: italic;
+  }
+
+  /* POST TYPE TOGGLE */
+  .post-type-toggle {
+    display: flex;
+    gap: 0;
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+  }
+  .post-type-btn {
+    flex: 1;
+    padding: 10px 8px;
+    background: transparent;
+    border: none;
+    border-right: 1px solid var(--border);
+    color: var(--text-dim);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .post-type-btn:last-child { border-right: none; }
+  .post-type-btn.active {
+    background: rgba(79,168,232,0.1);
+    color: var(--accent);
+  }
+  .post-type-btn.active.lfg-btn {
+    background: rgba(79,232,168,0.08);
+    color: var(--success);
+  }
+  .post-type-btn.active.lfm-btn {
+    background: rgba(176,143,232,0.08);
+    color: #b08fe8;
+  }
+
+  /* FILTER chip for solo */
+  .filter-chip.solo-active {
+    border-color: var(--success);
+    color: var(--success);
+    background: rgba(79,232,168,0.08);
+  }
 </style>
 </head>
 <body>
@@ -836,7 +932,7 @@
 <div class="app">
   <nav>
     <div class="nav-top">
-      <div class="logo">CREW<span>FIND</span></div>
+      <div class="logo">CREW<span>FIND 2</span></div>
       <button class="btn-new-post" id="btn-open-post" onclick="openPostModal()">+ POST</button>
     </div>
     <div class="nav-bottom">
@@ -861,7 +957,7 @@
       </div>
 
       <!-- Discord banner -->
-      <div onclick="window.open('https://discord.gg/AzW5aVNXky','_blank')" style="cursor:pointer;margin-bottom:16px;padding:10px 14px;border:1px solid rgba(232,168,79,0.3);background:rgba(232,168,79,0.05);display:flex;align-items:center;gap:10px">
+      <div onclick="openExternalUrl('https://discord.gg/AzW5aVNXky')" style="cursor:pointer;margin-bottom:16px;padding:10px 14px;border:1px solid rgba(232,168,79,0.3);background:rgba(232,168,79,0.05);display:flex;align-items:center;gap:10px">
         <div style="font-size:16px">🔔</div>
         <div>
           <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#e8a84f;letter-spacing:1px;text-transform:uppercase">Join our Discord for crew notifications</div>
@@ -880,6 +976,7 @@
         <button class="filter-chip" id="fc-piracy" onclick="filterBy('piracy', this)">PvP</button>
         <button class="filter-chip" id="fc-escort" onclick="filterBy('escort', this)">Escort</button>
         <button class="filter-chip" id="fc-ground" onclick="filterBy('ground', this)">Ground</button>
+        <button class="filter-chip" id="fc-solo" onclick="filterBy('solo', this)">Solo/LFG</button>
       </div>
 
       <div class="listings" id="listings-grid"></div>
@@ -902,120 +999,164 @@
 <div class="modal-overlay" id="post-modal" onclick="if(event.target===this)closePostModal()">
   <div class="modal">
     <button class="modal-close" id="btn-close-post" onclick="closePostModal()">✕</button>
-    <div class="modal-title">// New Crew Listing</div>
+    <div class="modal-title" id="post-modal-title">// New Crew Listing</div>
 
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Ship</label>
-        <div class="ship-select-wrapper">
-          <input class="form-input" id="f-ship-search" placeholder="Search ships..." autocomplete="off" />
-          <div class="ship-dropdown" id="ship-dropdown"></div>
-          <input type="hidden" id="f-ship" />
+    <!-- Post type toggle -->
+    <div class="post-type-toggle">
+      <button class="post-type-btn active" id="ptype-crew" onclick="setPostType('crew')">⚡ LFM Crew</button>
+      <button class="post-type-btn lfg-btn" id="ptype-lfg" onclick="setPostType('lfg')">🔍 LFG Solo</button>
+      <button class="post-type-btn lfm-btn" id="ptype-lfm" onclick="setPostType('lfm')">👥 LFM Solo</button>
+    </div>
+
+    <!-- CREW POST FIELDS -->
+    <div id="crew-fields">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Ship</label>
+          <div class="ship-select-wrapper">
+            <input class="form-input" id="f-ship-search" placeholder="Search ships..." autocomplete="off" />
+            <div class="ship-dropdown" id="ship-dropdown"></div>
+            <input type="hidden" id="f-ship" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mission Type</label>
+          <select class="form-select" id="f-mission">
+            <option value="bounty">Bounty Hunting</option>
+            <option value="cargo">Cargo Run</option>
+            <option value="patrol">Patrol</option>
+            <option value="explore">Exploration</option>
+            <option value="mining">Mining</option>
+            <option value="salvage">Salvage</option>
+            <option value="medical">Medical/Rescue</option>
+            <option value="piracy">PvP/Piracy</option>
+            <option value="escort">Escort</option>
+            <option value="ground">Ground Combat</option>
+          </select>
         </div>
       </div>
+
       <div class="form-group">
-        <label class="form-label">Mission Type</label>
-        <select class="form-select" id="f-mission">
-          <option value="bounty">Bounty Hunting</option>
-          <option value="cargo">Cargo Run</option>
-          <option value="patrol">Patrol</option>
-          <option value="explore">Exploration</option>
-          <option value="mining">Mining</option>
-          <option value="salvage">Salvage</option>
-          <option value="medical">Medical/Rescue</option>
-          <option value="piracy">PvP/Piracy</option>
-          <option value="escort">Escort</option>
-          <option value="ground">Ground Combat</option>
-        </select>
+        <label class="form-label">Roles Needed (tap to add, up to 8 each)</label>
+        <div class="roles-grid" id="roles-grid">
+          <div class="role-counter" data-value="Gunner">
+            <span class="role-name">Gunner</span>
+            <div class="role-controls">
+              <button type="button" class="role-btn" onclick="adjustRole(this, -1)">−</button>
+              <span class="role-count">0</span>
+              <button type="button" class="role-btn" onclick="adjustRole(this, 1)">+</button>
+            </div>
+          </div>
+          <div class="role-counter" data-value="Co-Pilot">
+            <span class="role-name">Co-Pilot</span>
+            <div class="role-controls">
+              <button type="button" class="role-btn" onclick="adjustRole(this, -1)">−</button>
+              <span class="role-count">0</span>
+              <button type="button" class="role-btn" onclick="adjustRole(this, 1)">+</button>
+            </div>
+          </div>
+          <div class="role-counter" data-value="Engineer">
+            <span class="role-name">Engineer</span>
+            <div class="role-controls">
+              <button type="button" class="role-btn" onclick="adjustRole(this, -1)">−</button>
+              <span class="role-count">0</span>
+              <button type="button" class="role-btn" onclick="adjustRole(this, 1)">+</button>
+            </div>
+          </div>
+          <div class="role-counter" data-value="Medic">
+            <span class="role-name">Medic</span>
+            <div class="role-controls">
+              <button type="button" class="role-btn" onclick="adjustRole(this, -1)">−</button>
+              <span class="role-count">0</span>
+              <button type="button" class="role-btn" onclick="adjustRole(this, 1)">+</button>
+            </div>
+          </div>
+          <div class="role-counter" data-value="Cargo Op">
+            <span class="role-name">Cargo Op</span>
+            <div class="role-controls">
+              <button type="button" class="role-btn" onclick="adjustRole(this, -1)">−</button>
+              <span class="role-count">0</span>
+              <button type="button" class="role-btn" onclick="adjustRole(this, 1)">+</button>
+            </div>
+          </div>
+          <div class="role-counter" data-value="Boarding">
+            <span class="role-name">Boarding</span>
+            <div class="role-controls">
+              <button type="button" class="role-btn" onclick="adjustRole(this, -1)">−</button>
+              <span class="role-count">0</span>
+              <button type="button" class="role-btn" onclick="adjustRole(this, 1)">+</button>
+            </div>
+          </div>
+          <div class="role-counter" data-value="Mining">
+            <span class="role-name">Mining</span>
+            <div class="role-controls">
+              <button type="button" class="role-btn" onclick="adjustRole(this, -1)">−</button>
+              <span class="role-count">0</span>
+              <button type="button" class="role-btn" onclick="adjustRole(this, 1)">+</button>
+            </div>
+          </div>
+          <div class="role-counter" data-value="Salvage">
+            <span class="role-name">Salvage</span>
+            <div class="role-controls">
+              <button type="button" class="role-btn" onclick="adjustRole(this, -1)">−</button>
+              <span class="role-count">0</span>
+              <button type="button" class="role-btn" onclick="adjustRole(this, 1)">+</button>
+            </div>
+          </div>
+          <div class="role-counter" data-value="Security">
+            <span class="role-name">Security</span>
+            <div class="role-controls">
+              <button type="button" class="role-btn" onclick="adjustRole(this, -1)">−</button>
+              <span class="role-count">0</span>
+              <button type="button" class="role-btn" onclick="adjustRole(this, 1)">+</button>
+            </div>
+          </div>
+          <div class="role-counter" data-value="Privateer">
+            <span class="role-name">Privateer</span>
+            <div class="role-controls">
+              <button type="button" class="role-btn" onclick="adjustRole(this, -1)">−</button>
+              <span class="role-count">0</span>
+              <button type="button" class="role-btn" onclick="adjustRole(this, 1)">+</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="form-group">
-      <label class="form-label">Roles Needed (tap to add, up to 8 each)</label>
-      <div class="roles-grid" id="roles-grid">
-        <div class="role-counter" data-value="Gunner">
-          <span class="role-name">Gunner</span>
-          <div class="role-controls">
-            <button type="button" class="role-btn" onclick="adjustRole(this, -1)">−</button>
-            <span class="role-count">0</span>
-            <button type="button" class="role-btn" onclick="adjustRole(this, 1)">+</button>
+    <!-- SOLO POST FIELDS -->
+    <div id="solo-fields" style="display:none">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Your Ship / Vehicle</label>
+          <div class="ship-select-wrapper">
+            <input class="form-input" id="f-solo-ship-search" placeholder="Search ships & vehicles..." autocomplete="off" />
+            <div class="ship-dropdown" id="solo-ship-dropdown"></div>
+            <input type="hidden" id="f-solo-ship" />
           </div>
         </div>
-        <div class="role-counter" data-value="Co-Pilot">
-          <span class="role-name">Co-Pilot</span>
-          <div class="role-controls">
-            <button type="button" class="role-btn" onclick="adjustRole(this, -1)">−</button>
-            <span class="role-count">0</span>
-            <button type="button" class="role-btn" onclick="adjustRole(this, 1)">+</button>
-          </div>
+        <div class="form-group">
+          <label class="form-label">Activity</label>
+          <select class="form-select" id="f-solo-mission">
+            <option value="bounty">Bounty Hunting</option>
+            <option value="cargo">Cargo Run</option>
+            <option value="patrol">Patrol</option>
+            <option value="explore">Exploration</option>
+            <option value="mining">Mining</option>
+            <option value="salvage">Salvage</option>
+            <option value="medical">Medical/Rescue</option>
+            <option value="piracy">PvP/Piracy</option>
+            <option value="escort">Escort</option>
+            <option value="ground">Ground Combat</option>
+          </select>
         </div>
-        <div class="role-counter" data-value="Engineer">
-          <span class="role-name">Engineer</span>
-          <div class="role-controls">
-            <button type="button" class="role-btn" onclick="adjustRole(this, -1)">−</button>
-            <span class="role-count">0</span>
-            <button type="button" class="role-btn" onclick="adjustRole(this, 1)">+</button>
-          </div>
-        </div>
-        <div class="role-counter" data-value="Medic">
-          <span class="role-name">Medic</span>
-          <div class="role-controls">
-            <button type="button" class="role-btn" onclick="adjustRole(this, -1)">−</button>
-            <span class="role-count">0</span>
-            <button type="button" class="role-btn" onclick="adjustRole(this, 1)">+</button>
-          </div>
-        </div>
-        <div class="role-counter" data-value="Cargo Op">
-          <span class="role-name">Cargo Op</span>
-          <div class="role-controls">
-            <button type="button" class="role-btn" onclick="adjustRole(this, -1)">−</button>
-            <span class="role-count">0</span>
-            <button type="button" class="role-btn" onclick="adjustRole(this, 1)">+</button>
-          </div>
-        </div>
-        <div class="role-counter" data-value="Boarding">
-          <span class="role-name">Boarding</span>
-          <div class="role-controls">
-            <button type="button" class="role-btn" onclick="adjustRole(this, -1)">−</button>
-            <span class="role-count">0</span>
-            <button type="button" class="role-btn" onclick="adjustRole(this, 1)">+</button>
-          </div>
-        </div>
-        <div class="role-counter" data-value="Mining">
-          <span class="role-name">Mining</span>
-          <div class="role-controls">
-            <button type="button" class="role-btn" onclick="adjustRole(this, -1)">−</button>
-            <span class="role-count">0</span>
-            <button type="button" class="role-btn" onclick="adjustRole(this, 1)">+</button>
-          </div>
-        </div>
-        <div class="role-counter" data-value="Salvage">
-          <span class="role-name">Salvage</span>
-          <div class="role-controls">
-            <button type="button" class="role-btn" onclick="adjustRole(this, -1)">−</button>
-            <span class="role-count">0</span>
-            <button type="button" class="role-btn" onclick="adjustRole(this, 1)">+</button>
-          </div>
-        </div>
-        <div class="role-counter" data-value="Security">
-          <span class="role-name">Security</span>
-          <div class="role-controls">
-            <button type="button" class="role-btn" onclick="adjustRole(this, -1)">−</button>
-            <span class="role-count">0</span>
-            <button type="button" class="role-btn" onclick="adjustRole(this, 1)">+</button>
-          </div>
-        </div>
-        <div class="role-counter" data-value="Privateer">
-          <span class="role-name">Privateer</span>
-          <div class="role-controls">
-            <button type="button" class="role-btn" onclick="adjustRole(this, -1)">−</button>
-            <span class="role-count">0</span>
-            <button type="button" class="role-btn" onclick="adjustRole(this, 1)">+</button>
-          </div>
-        </div>
+      </div>
+      <div class="form-group" id="solo-looking-label-wrap">
+        <label class="form-label" id="solo-note-label">What you're looking for</label>
+        <input class="form-input" id="f-solo-note" placeholder="e.g. Looking to join a mining fleet..." maxlength="120" />
       </div>
     </div>
 
+    <!-- SHARED FIELDS -->
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">System</label>
@@ -1066,85 +1207,283 @@
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNmb3psZ3RoZ3ZwaGtudHhiaGduIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5MDA5MzAsImV4cCI6MjA4OTQ3NjkzMH0.aPPT8O29hEQKw3uf29FWSyyBJxv1GT7_YtF83dRx2n4';
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  // Star Citizen Multi-Crew Ships (Flight Ready, 2+ crew)
+  // Star Citizen Ships & Vehicles — updated March 2026
   const SHIPS = [
-    // Origin Jumpworks
-    { name: '400i', manufacturer: 'Origin' },
-    { name: '600i Explorer', manufacturer: 'Origin' },
-    { name: '600i Touring', manufacturer: 'Origin' },
-    { name: '890 Jump', manufacturer: 'Origin' },
-    // Aegis Dynamics
-    { name: 'Hammerhead', manufacturer: 'Aegis' },
-    { name: 'Idris-M', manufacturer: 'Aegis' },
-    { name: 'Idris-P', manufacturer: 'Aegis' },
-    { name: 'Reclaimer', manufacturer: 'Aegis' },
-    { name: 'Redeemer', manufacturer: 'Aegis' },
-    { name: 'Retaliator Bomber', manufacturer: 'Aegis' },
-    { name: 'Vanguard Harbinger', manufacturer: 'Aegis' },
-    { name: 'Vanguard Hoplite', manufacturer: 'Aegis' },
-    { name: 'Vanguard Sentinel', manufacturer: 'Aegis' },
-    { name: 'Vanguard Warden', manufacturer: 'Aegis' },
-    // Anvil Aerospace
-    { name: 'C8 Pisces', manufacturer: 'Anvil' },
-    { name: 'C8R Pisces Rescue', manufacturer: 'Anvil' },
-    { name: 'Carrack', manufacturer: 'Anvil' },
-    { name: 'F7C-M Super Hornet', manufacturer: 'Anvil' },
-    { name: 'Gladiator', manufacturer: 'Anvil' },
-    { name: 'Hurricane', manufacturer: 'Anvil' },
-    { name: 'Valkyrie', manufacturer: 'Anvil' },
-    // RSI
-    { name: 'Constellation Andromeda', manufacturer: 'RSI' },
-    { name: 'Constellation Aquila', manufacturer: 'RSI' },
-    { name: 'Constellation Phoenix', manufacturer: 'RSI' },
-    { name: 'Constellation Taurus', manufacturer: 'RSI' },
-    { name: 'Perseus', manufacturer: 'RSI' },
-    { name: 'Polaris', manufacturer: 'RSI' },
-    { name: 'Scorpius', manufacturer: 'RSI' },
-    // Drake Interplanetary
-    { name: 'Caterpillar', manufacturer: 'Drake' },
-    { name: 'Corsair', manufacturer: 'Drake' },
-    { name: 'Cutlass Black', manufacturer: 'Drake' },
-    { name: 'Cutlass Blue', manufacturer: 'Drake' },
-    { name: 'Cutlass Red', manufacturer: 'Drake' },
-    // MISC
-    { name: 'Freelancer', manufacturer: 'MISC' },
-    { name: 'Freelancer DUR', manufacturer: 'MISC' },
-    { name: 'Freelancer MAX', manufacturer: 'MISC' },
-    { name: 'Freelancer MIS', manufacturer: 'MISC' },
-    { name: 'Reliant Kore', manufacturer: 'MISC' },
-    { name: 'Reliant Mako', manufacturer: 'MISC' },
-    { name: 'Reliant Sen', manufacturer: 'MISC' },
-    { name: 'Reliant Tana', manufacturer: 'MISC' },
-    { name: 'Starfarer', manufacturer: 'MISC' },
-    { name: 'Starfarer Gemini', manufacturer: 'MISC' },
-    // Crusader Industries
-    { name: 'A2 Hercules', manufacturer: 'Crusader' },
-    { name: 'C2 Hercules', manufacturer: 'Crusader' },
-    { name: 'M2 Hercules', manufacturer: 'Crusader' },
-    { name: 'Mercury Star Runner', manufacturer: 'Crusader' },
-    // Argo Astronautics
-    { name: 'MOLE', manufacturer: 'Argo' },
-    // Esperia (Alien Replicas)
-    { name: 'Prowler', manufacturer: 'Esperia' },
+    // ── MULTI-CREW ──────────────────────────────────────────
+    // Aegis
+    { name: 'Hammerhead', manufacturer: 'Aegis', type: 'multi' },
+    { name: 'Idris-M', manufacturer: 'Aegis', type: 'multi' },
+    { name: 'Idris-P', manufacturer: 'Aegis', type: 'multi' },
+    { name: 'Nautilus', manufacturer: 'Aegis', type: 'multi' },
+    { name: 'Reclaimer', manufacturer: 'Aegis', type: 'multi' },
+    { name: 'Redeemer', manufacturer: 'Aegis', type: 'multi' },
+    { name: 'Retaliator', manufacturer: 'Aegis', type: 'multi' },
+    { name: 'Vanguard Harbinger', manufacturer: 'Aegis', type: 'multi' },
+    { name: 'Vanguard Hoplite', manufacturer: 'Aegis', type: 'multi' },
+    { name: 'Vanguard Sentinel', manufacturer: 'Aegis', type: 'multi' },
+    { name: 'Vanguard Warden', manufacturer: 'Aegis', type: 'multi' },
+    // Anvil
+    { name: 'Asgard', manufacturer: 'Anvil', type: 'multi' },
+    { name: 'Carrack', manufacturer: 'Anvil', type: 'multi' },
+    { name: 'F7C-M Super Hornet Mk2', manufacturer: 'Anvil', type: 'multi' },
+    { name: 'Gladiator', manufacturer: 'Anvil', type: 'multi' },
+    { name: 'Hurricane', manufacturer: 'Anvil', type: 'multi' },
+    { name: 'Paladin', manufacturer: 'Anvil', type: 'multi' },
+    { name: 'Pisces C8R Rescue', manufacturer: 'Anvil', type: 'multi' },
+    { name: 'Pisces C8X Expedition', manufacturer: 'Anvil', type: 'multi' },
+    { name: 'Terrapin', manufacturer: 'Anvil', type: 'multi' },
+    { name: 'Terrapin Medic', manufacturer: 'Anvil', type: 'multi' },
+    { name: 'Valkyrie', manufacturer: 'Anvil', type: 'multi' },
+    // Argo
+    { name: 'MOLE', manufacturer: 'Argo', type: 'multi' },
+    { name: 'MOTH', manufacturer: 'Argo', type: 'multi' },
+    { name: 'RAFT', manufacturer: 'Argo', type: 'multi' },
     // Banu
-    { name: 'Defender', manufacturer: 'Banu' },
+    { name: 'Defender', manufacturer: 'Banu', type: 'multi' },
+    // Crusader
+    { name: 'Apollo Medivac', manufacturer: 'Crusader', type: 'multi' },
+    { name: 'Apollo Triage', manufacturer: 'Crusader', type: 'multi' },
+    { name: 'Ares Inferno', manufacturer: 'Crusader', type: 'multi' },
+    { name: 'Ares Ion', manufacturer: 'Crusader', type: 'multi' },
+    { name: 'Hercules A2', manufacturer: 'Crusader', type: 'multi' },
+    { name: 'Hercules C2', manufacturer: 'Crusader', type: 'multi' },
+    { name: 'Hercules M2', manufacturer: 'Crusader', type: 'multi' },
+    { name: 'Mercury Star Runner', manufacturer: 'Crusader', type: 'multi' },
+    { name: 'Spirit A1', manufacturer: 'Crusader', type: 'multi' },
+    { name: 'Spirit C1', manufacturer: 'Crusader', type: 'multi' },
+    // Drake
+    { name: 'Caterpillar', manufacturer: 'Drake', type: 'multi' },
+    { name: 'Corsair', manufacturer: 'Drake', type: 'multi' },
+    { name: 'Cutlass Black', manufacturer: 'Drake', type: 'multi' },
+    { name: 'Cutlass Blue', manufacturer: 'Drake', type: 'multi' },
+    { name: 'Cutlass Red', manufacturer: 'Drake', type: 'multi' },
+    { name: 'Cutlass Steel', manufacturer: 'Drake', type: 'multi' },
+    // Esperia
+    { name: 'Prowler', manufacturer: 'Esperia', type: 'multi' },
+    { name: 'Prowler Utility', manufacturer: 'Esperia', type: 'multi' },
+    // Gatac
+    { name: 'Railen', manufacturer: 'Gatac', type: 'multi' },
+    // MISC
+    { name: 'Freelancer', manufacturer: 'MISC', type: 'multi' },
+    { name: 'Freelancer DUR', manufacturer: 'MISC', type: 'multi' },
+    { name: 'Freelancer MAX', manufacturer: 'MISC', type: 'multi' },
+    { name: 'Freelancer MIS', manufacturer: 'MISC', type: 'multi' },
+    { name: 'Hull C', manufacturer: 'MISC', type: 'multi' },
+    { name: 'Reliant Kore', manufacturer: 'MISC', type: 'multi' },
+    { name: 'Reliant Mako', manufacturer: 'MISC', type: 'multi' },
+    { name: 'Reliant Sen', manufacturer: 'MISC', type: 'multi' },
+    { name: 'Reliant Tana', manufacturer: 'MISC', type: 'multi' },
+    { name: 'Starlancer MAX', manufacturer: 'MISC', type: 'multi' },
+    { name: 'Starlancer TAC', manufacturer: 'MISC', type: 'multi' },
+    { name: 'Starfarer', manufacturer: 'MISC', type: 'multi' },
+    { name: 'Starfarer Gemini', manufacturer: 'MISC', type: 'multi' },
+    // Mirai
+    { name: 'Guardian', manufacturer: 'Mirai', type: 'multi' },
+    { name: 'Guardian MX', manufacturer: 'Mirai', type: 'multi' },
+    { name: 'Guardian QI', manufacturer: 'Mirai', type: 'multi' },
+    // Origin
+    { name: '400i', manufacturer: 'Origin', type: 'multi' },
+    { name: '600i Explorer', manufacturer: 'Origin', type: 'multi' },
+    { name: '600i Touring', manufacturer: 'Origin', type: 'multi' },
+    { name: '890 Jump', manufacturer: 'Origin', type: 'multi' },
+    // RSI
+    { name: 'Constellation Andromeda', manufacturer: 'RSI', type: 'multi' },
+    { name: 'Constellation Aquila', manufacturer: 'RSI', type: 'multi' },
+    { name: 'Constellation Phoenix', manufacturer: 'RSI', type: 'multi' },
+    { name: 'Constellation Taurus', manufacturer: 'RSI', type: 'multi' },
+    { name: 'Hermes', manufacturer: 'RSI', type: 'multi' },
+    { name: 'Perseus', manufacturer: 'RSI', type: 'multi' },
+    { name: 'Polaris', manufacturer: 'RSI', type: 'multi' },
+    { name: 'Scorpius', manufacturer: 'RSI', type: 'multi' },
+    { name: 'Scorpius Antares', manufacturer: 'RSI', type: 'multi' },
+    { name: 'Zeus Mk II CL', manufacturer: 'RSI', type: 'multi' },
+    { name: 'Zeus Mk II ES', manufacturer: 'RSI', type: 'multi' },
+
+    // ── SOLO SHIPS ───────────────────────────────────────────
+    // Aegis
+    { name: 'Avenger Stalker', manufacturer: 'Aegis', type: 'solo' },
+    { name: 'Avenger Titan', manufacturer: 'Aegis', type: 'solo' },
+    { name: 'Avenger Warlock', manufacturer: 'Aegis', type: 'solo' },
+    { name: 'Eclipse', manufacturer: 'Aegis', type: 'solo' },
+    { name: 'Gladius', manufacturer: 'Aegis', type: 'solo' },
+    { name: 'Sabre', manufacturer: 'Aegis', type: 'solo' },
+    { name: 'Sabre Comet', manufacturer: 'Aegis', type: 'solo' },
+    { name: 'Sabre Firebird', manufacturer: 'Aegis', type: 'solo' },
+    { name: 'Sabre Raven', manufacturer: 'Aegis', type: 'solo' },
+    // Anvil
+    { name: 'Arrow', manufacturer: 'Anvil', type: 'solo' },
+    { name: 'F7A Hornet Mk2', manufacturer: 'Anvil', type: 'solo' },
+    { name: 'F7C Hornet Mk2', manufacturer: 'Anvil', type: 'solo' },
+    { name: 'F7C-R Hornet Tracker Mk2', manufacturer: 'Anvil', type: 'solo' },
+    { name: 'F7C-S Hornet Ghost Mk2', manufacturer: 'Anvil', type: 'solo' },
+    { name: 'F8C Lightning', manufacturer: 'Anvil', type: 'solo' },
+    { name: 'Hawk', manufacturer: 'Anvil', type: 'solo' },
+    // Argo
+    { name: 'MPUV Cargo', manufacturer: 'Argo', type: 'solo' },
+    { name: 'MPUV Personnel', manufacturer: 'Argo', type: 'solo' },
+    { name: 'MPUV Tractor', manufacturer: 'Argo', type: 'solo' },
+    { name: 'SRV', manufacturer: 'Argo', type: 'solo' },
+    // CNOU
+    { name: 'Mustang Alpha', manufacturer: 'CNOU', type: 'solo' },
+    { name: 'Mustang Beta', manufacturer: 'CNOU', type: 'solo' },
+    { name: 'Mustang Delta', manufacturer: 'CNOU', type: 'solo' },
+    { name: 'Mustang Gamma', manufacturer: 'CNOU', type: 'solo' },
+    { name: 'Nomad', manufacturer: 'CNOU', type: 'solo' },
+    // Crusader
+    { name: 'Intrepid', manufacturer: 'Crusader', type: 'solo' },
+    // Drake
+    { name: 'Buccaneer', manufacturer: 'Drake', type: 'solo' },
+    { name: 'Clipper', manufacturer: 'Drake', type: 'solo' },
+    { name: 'Cutter', manufacturer: 'Drake', type: 'solo' },
+    { name: 'Cutter Rambler', manufacturer: 'Drake', type: 'solo' },
+    { name: 'Cutter Scout', manufacturer: 'Drake', type: 'solo' },
+    { name: 'Golem', manufacturer: 'Drake', type: 'solo' },
+    { name: 'Golem OX', manufacturer: 'Drake', type: 'solo' },
+    { name: 'Herald', manufacturer: 'Drake', type: 'solo' },
+    { name: 'Vulture', manufacturer: 'Drake', type: 'solo' },
+    // Esperia
+    { name: 'Blade', manufacturer: 'Esperia', type: 'solo' },
+    { name: 'Glaive', manufacturer: 'Esperia', type: 'solo' },
+    { name: 'Scythe', manufacturer: 'Esperia', type: 'solo' },
+    { name: 'Stinger', manufacturer: 'Esperia', type: 'solo' },
+    { name: 'Talon', manufacturer: 'Esperia', type: 'solo' },
+    { name: 'Talon Shrike', manufacturer: 'Esperia', type: 'solo' },
+    // Gatac
+    { name: 'Syulen', manufacturer: 'Gatac', type: 'solo' },
+    // Grey\'s Market
+    { name: 'Shiv', manufacturer: "Grey's", type: 'solo' },
+    // Kruger
+    { name: 'L-21 Wolf', manufacturer: 'Kruger', type: 'solo' },
+    { name: 'L-22 Alpha Wolf', manufacturer: 'Kruger', type: 'solo' },
+    { name: 'P-52 Merlin', manufacturer: 'Kruger', type: 'solo' },
+    { name: 'P-72 Archimedes', manufacturer: 'Kruger', type: 'solo' },
+    // MISC
+    { name: 'Fortune', manufacturer: 'MISC', type: 'solo' },
+    { name: 'Hull A', manufacturer: 'MISC', type: 'solo' },
+    { name: 'Prospector', manufacturer: 'MISC', type: 'solo' },
+    { name: 'Razor', manufacturer: 'MISC', type: 'solo' },
+    { name: 'Razor EX', manufacturer: 'MISC', type: 'solo' },
+    { name: 'Razor LX', manufacturer: 'MISC', type: 'solo' },
+    // Mirai
+    { name: 'Fury', manufacturer: 'Mirai', type: 'solo' },
+    { name: 'Fury LX', manufacturer: 'Mirai', type: 'solo' },
+    { name: 'Fury MX', manufacturer: 'Mirai', type: 'solo' },
+    // Origin
+    { name: '100i', manufacturer: 'Origin', type: 'solo' },
+    { name: '125a', manufacturer: 'Origin', type: 'solo' },
+    { name: '135c', manufacturer: 'Origin', type: 'solo' },
+    { name: '300i', manufacturer: 'Origin', type: 'solo' },
+    { name: '315p', manufacturer: 'Origin', type: 'solo' },
+    { name: '325a', manufacturer: 'Origin', type: 'solo' },
+    { name: '350r', manufacturer: 'Origin', type: 'solo' },
+    { name: '85x', manufacturer: 'Origin', type: 'solo' },
+    { name: 'M50', manufacturer: 'Origin', type: 'solo' },
+    // RSI
+    { name: 'Aurora CL', manufacturer: 'RSI', type: 'solo' },
+    { name: 'Aurora ES', manufacturer: 'RSI', type: 'solo' },
+    { name: 'Aurora LN', manufacturer: 'RSI', type: 'solo' },
+    { name: 'Aurora LX', manufacturer: 'RSI', type: 'solo' },
+    { name: 'Aurora MR', manufacturer: 'RSI', type: 'solo' },
+    { name: 'Aurora Mk II', manufacturer: 'RSI', type: 'solo' },
+    { name: 'Mantis', manufacturer: 'RSI', type: 'solo' },
+    { name: 'Meteor', manufacturer: 'RSI', type: 'solo' },
+    { name: 'Salvation', manufacturer: 'RSI', type: 'solo' },
+    // AopoA (Alien)
+    { name: 'Khartu-Al', manufacturer: 'AopoA', type: 'solo' },
+    { name: 'San\'tok.yai', manufacturer: 'AopoA', type: 'solo' },
+
+    // ── GROUND VEHICLES ──────────────────────────────────────
+    // Anvil
+    { name: 'Ballista', manufacturer: 'Anvil', type: 'ground' },
+    { name: 'Centurion', manufacturer: 'Anvil', type: 'ground' },
+    { name: 'Spartan', manufacturer: 'Anvil', type: 'ground' },
+    // Argo
+    { name: 'ATLS', manufacturer: 'Argo', type: 'ground' },
+    { name: 'ATLS Geo', manufacturer: 'Argo', type: 'ground' },
+    { name: 'CSV-SM', manufacturer: 'Argo', type: 'ground' },
+    // CNOU
+    { name: 'HoverQuad', manufacturer: 'CNOU', type: 'ground' },
+    // Drake
+    { name: 'Dragonfly Black', manufacturer: 'Drake', type: 'ground' },
+    { name: 'Dragonfly Yellowjacket', manufacturer: 'Drake', type: 'ground' },
+    { name: 'Mule', manufacturer: 'Drake', type: 'ground' },
+    // Greycat
+    { name: 'MDC', manufacturer: 'Greycat', type: 'ground' },
+    { name: 'MTC', manufacturer: 'Greycat', type: 'ground' },
+    { name: 'PTV', manufacturer: 'Greycat', type: 'ground' },
+    { name: 'ROC', manufacturer: 'Greycat', type: 'ground' },
+    { name: 'ROC DS', manufacturer: 'Greycat', type: 'ground' },
+    { name: 'STV', manufacturer: 'Greycat', type: 'ground' },
+    // Mirai
+    { name: 'Pulse', manufacturer: 'Mirai', type: 'ground' },
+    { name: 'Pulse LX', manufacturer: 'Mirai', type: 'ground' },
+    // Origin
+    { name: 'Lynx Rover', manufacturer: 'Origin', type: 'ground' },
+    { name: 'X1 Base', manufacturer: 'Origin', type: 'ground' },
+    { name: 'X1 Force', manufacturer: 'Origin', type: 'ground' },
+    { name: 'X1 Velocity', manufacturer: 'Origin', type: 'ground' },
+    // RSI
+    { name: 'Ursa Rover', manufacturer: 'RSI', type: 'ground' },
+    { name: 'Ursa Rover Fortuna', manufacturer: 'RSI', type: 'ground' },
+    { name: 'Ursa Rover Medivac', manufacturer: 'RSI', type: 'ground' },
+    // Tumbril
+    { name: 'Cyclone', manufacturer: 'Tumbril', type: 'ground' },
+    { name: 'Cyclone AA', manufacturer: 'Tumbril', type: 'ground' },
+    { name: 'Cyclone MT', manufacturer: 'Tumbril', type: 'ground' },
+    { name: 'Cyclone RC', manufacturer: 'Tumbril', type: 'ground' },
+    { name: 'Cyclone RN', manufacturer: 'Tumbril', type: 'ground' },
+    { name: 'Cyclone TR', manufacturer: 'Tumbril', type: 'ground' },
+    { name: 'Nova', manufacturer: 'Tumbril', type: 'ground' },
+    { name: 'Storm', manufacturer: 'Tumbril', type: 'ground' },
+    { name: 'Storm AA', manufacturer: 'Tumbril', type: 'ground' },
+    // AopoA
+    { name: 'Nox', manufacturer: 'AopoA', type: 'ground' },
+    { name: 'Nox Kue', manufacturer: 'AopoA', type: 'ground' },
   ].sort((a, b) => a.name.localeCompare(b.name));
 
   // Ship search functionality
   let selectedShipIndex = -1;
-  
+  let currentPostType = 'crew'; // 'crew' | 'lfg' | 'lfm'
+
+  function setPostType(type) {
+    currentPostType = type;
+    // Update toggle buttons
+    document.querySelectorAll('.post-type-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('ptype-' + type).classList.add('active');
+    // Toggle field sections
+    const isSolo = type === 'lfg' || type === 'lfm';
+    document.getElementById('crew-fields').style.display = isSolo ? 'none' : '';
+    document.getElementById('solo-fields').style.display = isSolo ? '' : 'none';
+    // Update modal title and button text
+    const titles = { crew: '// New Crew Listing', lfg: '// Looking For Crew', lfm: '// Solo Players LFM' };
+    const btns = { crew: 'BROADCAST LISTING', lfg: 'BROADCAST LFG POST', lfm: 'BROADCAST LFM POST' };
+    const notes = { lfg: 'What crew / ship are you hoping to join?', lfm: 'What activity are you recruiting solo players for?' };
+    document.getElementById('post-modal-title').textContent = titles[type];
+    document.getElementById('btn-submit-post').textContent = btns[type];
+    if (isSolo && notes[type]) {
+      document.getElementById('f-solo-note').placeholder = type === 'lfg'
+        ? 'e.g. Looking to join a mining fleet, own Prospector'
+        : 'e.g. Forming a wing of fighters for bounty — 3 solos needed';
+    }
+  }
+
   function initShipSearch() {
-    const searchInput = document.getElementById('f-ship-search');
-    const dropdown = document.getElementById('ship-dropdown');
-    const hiddenInput = document.getElementById('f-ship');
+    setupShipSearch('f-ship-search', 'ship-dropdown', 'f-ship', ['multi']);
+    setupShipSearch('f-solo-ship-search', 'solo-ship-dropdown', 'f-solo-ship', ['solo', 'ground', 'multi']);
+  }
+
+  function setupShipSearch(inputId, dropdownId, hiddenId, types) {
+    const searchInput = document.getElementById(inputId);
+    const dropdown = document.getElementById(dropdownId);
+    if (!searchInput || !dropdown) return;
     
     searchInput.addEventListener('focus', () => {
-      renderShipDropdown(searchInput.value);
+      renderShipDropdown(searchInput.value, dropdownId, hiddenId, types);
       dropdown.classList.add('open');
     });
     
     searchInput.addEventListener('input', (e) => {
-      renderShipDropdown(e.target.value);
+      renderShipDropdown(e.target.value, dropdownId, hiddenId, types);
       dropdown.classList.add('open');
       selectedShipIndex = -1;
     });
@@ -1177,25 +1516,34 @@
     });
   }
   
-  function renderShipDropdown(query) {
-    const dropdown = document.getElementById('ship-dropdown');
+  const TYPE_LABEL = { multi: 'Multi', solo: 'Solo', ground: 'Ground' };
+
+  function renderShipDropdown(query, dropdownId, hiddenId, types) {
+    const dropdown = document.getElementById(dropdownId);
+    if (!dropdown) return;
     const q = query.toLowerCase();
-    const filtered = SHIPS.filter(s => 
-      s.name.toLowerCase().includes(q) || 
-      s.manufacturer.toLowerCase().includes(q)
+    const filtered = SHIPS.filter(s =>
+      types.includes(s.type) &&
+      (s.name.toLowerCase().includes(q) || s.manufacturer.toLowerCase().includes(q))
     );
-    
     dropdown.innerHTML = filtered.map(s => `
-      <div class="ship-option" onclick="selectShip('${s.name.replace(/'/g, "\\'")}')">
-        ${s.name}<span class="manufacturer">${s.manufacturer}</span>
+      <div class="ship-option" onclick="selectShip('${s.name.replace(/'/g, "\\'")}','${dropdownId}','${hiddenId}')">
+        ${s.name}
+        <span class="manufacturer">${s.manufacturer}</span>
+        <span class="manufacturer" style="margin-left:4px;color:${s.type==='ground'?'#c8a878':s.type==='solo'?'#b08fe8':'var(--text-dim)'}">[${TYPE_LABEL[s.type]}]</span>
       </div>
     `).join('');
   }
   
-  function selectShip(name) {
-    document.getElementById('f-ship-search').value = name;
-    document.getElementById('f-ship').value = name;
-    document.getElementById('ship-dropdown').classList.remove('open');
+  function selectShip(name, dropdownId, hiddenId) {
+    // figure out which search input pairs with this dropdown
+    const dropdown = document.getElementById(dropdownId);
+    const hiddenInput = document.getElementById(hiddenId);
+    // find the search input immediately before the dropdown in the DOM
+    const searchId = dropdownId === 'ship-dropdown' ? 'f-ship-search' : 'f-solo-ship-search';
+    document.getElementById(searchId).value = name;
+    if (hiddenInput) hiddenInput.value = name;
+    if (dropdown) dropdown.classList.remove('open');
   }
 
   const ROLES_ALL = ['Gunner','Co-Pilot','Engineer','Medic','Cargo Op','Boarding'];
@@ -1245,6 +1593,44 @@
   function renderCard(l, isMine) {
     const applied = l.applied;
     isMine = isMine || (currentHandle && l.owner && l.owner.toUpperCase() === currentHandle.toUpperCase());
+    const isSoloLfg = l.post_type === 'lfg';
+    const isSoloLfm = l.post_type === 'lfm';
+    const isSolo = isSoloLfg || isSoloLfm;
+
+    if (isSolo) {
+      const soloClass = isSoloLfg ? 'solo-lfg' : 'solo-lfm';
+      const badgeClass = isSoloLfg ? 'lfg' : 'lfm';
+      const badgeText = isSoloLfg ? '🔍 LFG — Looking for Crew' : '👥 LFM — Solo Teamup';
+      const shipDisplay = (l.ship || 'No Ship Listed').toUpperCase();
+      return `
+      <div class="card ${soloClass}" style="animation-delay:${Math.random()*0.2}s">
+        <div class="card-header">
+          <div class="ship-name">${shipDisplay}</div>
+          <span class="solo-badge ${badgeClass}">${badgeText}</span>
+        </div>
+        <div class="card-owner">
+          <div class="owner-avatar" style="border-color:${isSoloLfg?'rgba(79,232,168,0.4)':'rgba(176,143,232,0.4)'};background:${isSoloLfg?'rgba(79,232,168,0.1)':'rgba(176,143,232,0.1)'};color:${isSoloLfg?'var(--success)':'#b08fe8'}">${l.owner.slice(0,2)}</div>
+          <div class="owner-info">
+            <div class="owner-handle">${l.owner}</div>
+            <div class="owner-meta">${l.timezone || ''} &nbsp;·&nbsp; ${l.playstyle || ''}</div>
+          </div>
+        </div>
+        <div class="mission-type ${missionColor(l.mission)}" style="margin-bottom:12px;display:inline-block">${missionLabel(l.mission)}</div>
+        ${l.solo_note ? `<div class="solo-note">"${l.solo_note}"</div>` : ''}
+        <div class="card-footer">
+          <div class="card-meta">
+            ${l.expires_at ? 'expires ' + new Date(l.expires_at).toLocaleDateString() : ''}
+          </div>
+          ${isMine
+            ? `<button class="btn-apply" style="border-color:var(--danger);color:var(--danger)" onclick="deleteListing('${l.id}')"><span>DELETE</span></button>`
+            : `<button class="btn-apply ${applied?'applied':''}" style="${isSoloLfg?'border-color:var(--success);color:var(--success)':'border-color:#b08fe8;color:#b08fe8'}" onclick="openApply('${l.id}')">
+                <span>${applied ? '✓ CONTACTED' : 'CONTACT'}</span>
+              </button>`
+          }
+        </div>
+      </div>`;
+    }
+
     const groupedRoles = groupRoles(l.roles);
     return `
     <div class="card" style="animation-delay:${Math.random()*0.2}s">
@@ -1284,7 +1670,11 @@
     grid.innerHTML = '<div style="padding:40px;text-align:center;font-family:monospace;color:#5a7a9a;letter-spacing:1px">[ LOADING... ]</div>';
     try {
       let query = sb.from('listings').select('*').order('created_at', { ascending: false });
-      if (activeFilter !== 'all') query = query.eq('mission', activeFilter);
+      if (activeFilter === 'solo') {
+        query = query.in('post_type', ['lfg', 'lfm']);
+      } else if (activeFilter !== 'all') {
+        query = query.eq('mission', activeFilter).is('post_type', null);
+      }
       const { data, error } = await query;
       if (error) throw error;
       listings.length = 0;
@@ -1382,6 +1772,7 @@
   function closePostModal() {
     document.getElementById('post-modal').classList.remove('open');
     document.body.style.overflow = '';
+    setPostType('crew');
   }
 
   function closeApplyModal() {
@@ -1415,10 +1806,51 @@
   }
 
   async function submitPost() {
+    const isSolo = currentPostType === 'lfg' || currentPostType === 'lfm';
+
+    if (isSolo) {
+      const ship = document.getElementById('f-solo-ship').value.trim() || 'No Ship Listed';
+      const mission = document.getElementById('f-solo-mission').value;
+      const system = document.getElementById('f-system').value;
+      const style = document.getElementById('f-style').value;
+      const discord = document.getElementById('f-discord').value.trim() || 'N/A';
+      const solo_note = document.getElementById('f-solo-note').value.trim();
+      const owner = currentHandle || 'PILOT';
+      const discordUser = currentUser ? (currentUser.user_metadata?.custom_claims?.global_name || currentUser.user_metadata?.full_name || '') : (localStorage.getItem('discord_username') || '');
+      const btn = document.getElementById('btn-submit-post');
+      btn.textContent = 'TRANSMITTING...';
+      btn.disabled = true;
+      try {
+        const { data, error } = await sb.from('listings').insert([{
+          ship, mission, owner, timezone: system, playstyle: style,
+          roles: currentPostType, // store post type in roles field as fallback
+          discord, owner_discord: document.getElementById('f-discord').value.trim() || discordUser,
+          expires_at: new Date(Date.now() + 48*60*60*1000).toISOString(),
+          post_type: currentPostType,
+          solo_note
+        }]).select();
+        if (error) throw error;
+        document.getElementById('f-solo-ship').value = '';
+        document.getElementById('f-solo-ship-search').value = '';
+        document.getElementById('f-solo-note').value = '';
+        document.getElementById('f-discord').value = '';
+        closePostModal();
+        await renderListings();
+        showToast('// SOLO POST BROADCAST TO SECTOR');
+      } catch(e) {
+        console.error('Post error:', e);
+        showToast('// ERROR: Could not post listing');
+      } finally {
+        btn.textContent = currentPostType === 'lfg' ? 'BROADCAST LFG POST' : 'BROADCAST LFM POST';
+        btn.disabled = false;
+      }
+      return;
+    }
+
+    // Original crew post logic
     const ship = document.getElementById('f-ship').value.trim();
     if (!ship) { showToast('// ERROR: Ship name required'); return; }
     
-    // Build roles array from counters (e.g., 3 Gunners = ["Gunner", "Gunner", "Gunner"])
     const roles = [];
     document.querySelectorAll('#roles-grid .role-counter').forEach(el => {
       const roleName = el.dataset.value;
@@ -1447,7 +1879,6 @@
       document.getElementById('f-ship-search').value = '';
       document.getElementById('f-discord').value = '';
       if (document.getElementById('f-owner')) document.getElementById('f-owner').value = '';
-      // Reset role counters
       document.querySelectorAll('#roles-grid .role-counter').forEach(el => {
         el.querySelector('.role-count').textContent = '0';
         el.classList.remove('active');
@@ -1498,7 +1929,7 @@
       </div>
       <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-dim);letter-spacing:1px;margin-bottom:14px;padding:10px 12px;border:1px solid var(--border);background:var(--bg)">
         <div style="margin-bottom:8px">CONTACT: <span style="color:var(--accent)">@${l.discord || l.owner}</span></div>
-        <a href="https://discord.gg/AzW5aVNXky" target="_blank" style="display:inline-block;padding:6px 12px;border:1px solid var(--accent);color:var(--accent);text-decoration:none;letter-spacing:1px;">JOIN CREWFIND DISCORD</a>
+        <a href="javascript:void(0)" onclick="openExternalUrl('https://discord.gg/AzW5aVNXky')" style="display:inline-block;padding:6px 12px;border:1px solid var(--accent);color:var(--accent);text-decoration:none;letter-spacing:1px;">JOIN CREWFIND DISCORD</a>
       </div>
       <button class="btn-post" id="btn-transmit" data-id="${id}" onclick="submitApply(this.dataset.id)">TRANSMIT APPLICATION</button>
     `;
@@ -1636,6 +2067,20 @@
       document.getElementById('onboarding').style.display = 'none';
     }
   });
+
+  // Open external URLs using Capacitor Browser plugin (keeps WebView clean on Android)
+  // Falls back to window.open on web
+  function openExternalUrl(url) {
+    if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+      if (window.Capacitor.Plugins && window.Capacitor.Plugins.Browser) {
+        window.Capacitor.Plugins.Browser.open({ url });
+      } else {
+        window.open(url, '_system');
+      }
+    } else {
+      window.open(url, '_blank');
+    }
+  }
 
   // INIT — always load immediately on page load
   initShipSearch();
