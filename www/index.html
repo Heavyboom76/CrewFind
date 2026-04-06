@@ -1159,14 +1159,15 @@
     <!-- SHARED FIELDS -->
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label">System</label>
+        <label class="form-label">Timezone</label>
         <select class="form-select" id="f-system">
-          <option value="Stanton">Stanton</option>
-          <option value="Pyro">Pyro</option>
-          <option value="Nyx">Nyx</option>
-          <option value="Terra">Terra</option>
-          <option value="Magnus">Magnus</option>
-          <option value="Any">Any System</option>
+          <option value="NA-W">NA West (PST/MST)</option>
+          <option value="NA-E">NA East (CST/EST)</option>
+          <option value="EU-W">EU West (GMT/CET)</option>
+          <option value="EU-E">EU East (EET)</option>
+          <option value="AUS">Australia/NZ (AEST)</option>
+          <option value="ASIA">Asia (JST/SGT)</option>
+          <option value="Any">Any Timezone</option>
         </select>
       </div>
       <div class="form-group">
@@ -1177,6 +1178,11 @@
           <option>Hardcore</option>
         </select>
       </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Org Tag <span style="color:var(--text-dim);font-size:9px;letter-spacing:0">(optional)</span></label>
+      <input class="form-input" id="f-org" placeholder="e.g. REDACTED, TEST, MISC..." maxlength="30" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()"/>
     </div>
 
     <div class="form-group">
@@ -1590,6 +1596,29 @@
     );
   }
 
+  function timezoneLabel(tz) {
+    const map = {
+      'NA-W': 'NA West', 'NA-E': 'NA East',
+      'EU-W': 'EU West', 'EU-E': 'EU East',
+      'AUS': 'Australia/NZ', 'ASIA': 'Asia', 'Any': 'Any TZ'
+    };
+    return map[tz] || tz || '';
+  }
+
+  async function bumpListing(id) {
+    try {
+      const newExpiry = new Date(Date.now() + 48*60*60*1000).toISOString();
+      const { error } = await sb.from('listings').update({ expires_at: newExpiry }).eq('id', id);
+      if (error) throw error;
+      await renderListings();
+      renderMyPosts();
+      showToast('// LISTING REFRESHED — 48H RESET');
+    } catch(e) {
+      console.error('Bump error:', e);
+      showToast('// ERROR: Could not bump listing');
+    }
+  }
+
   function renderCard(l, isMine) {
     const applied = l.applied;
     isMine = isMine || (currentHandle && l.owner && l.owner.toUpperCase() === currentHandle.toUpperCase());
@@ -1611,8 +1640,8 @@
         <div class="card-owner">
           <div class="owner-avatar" style="border-color:${isSoloLfg?'rgba(79,232,168,0.4)':'rgba(176,143,232,0.4)'};background:${isSoloLfg?'rgba(79,232,168,0.1)':'rgba(176,143,232,0.1)'};color:${isSoloLfg?'var(--success)':'#b08fe8'}">${l.owner.slice(0,2)}</div>
           <div class="owner-info">
-            <div class="owner-handle">${l.owner}</div>
-            <div class="owner-meta">${l.timezone || ''} &nbsp;·&nbsp; ${l.playstyle || ''}</div>
+            <div class="owner-handle">${l.owner}${l.org ? ` <span style="font-size:9px;color:var(--accent2);letter-spacing:1px;border:1px solid rgba(232,168,79,0.3);padding:1px 5px;margin-left:4px">${l.org}</span>` : ''}</div>
+            <div class="owner-meta">${timezoneLabel(l.timezone || '')} &nbsp;·&nbsp; ${l.playstyle || ''}</div>
           </div>
         </div>
         <div class="mission-type ${missionColor(l.mission)}" style="margin-bottom:12px;display:inline-block">${missionLabel(l.mission)}</div>
@@ -1622,7 +1651,10 @@
             ${l.expires_at ? 'expires ' + new Date(l.expires_at).toLocaleDateString() : ''}
           </div>
           ${isMine
-            ? `<button class="btn-apply" style="border-color:var(--danger);color:var(--danger)" onclick="deleteListing('${l.id}')"><span>DELETE</span></button>`
+            ? `<div style="display:flex;gap:6px">
+                <button class="btn-apply" style="border-color:var(--accent);color:var(--accent)" onclick="bumpListing('${l.id}')"><span>BUMP</span></button>
+                <button class="btn-apply" style="border-color:var(--danger);color:var(--danger)" onclick="deleteListing('${l.id}')"><span>DELETE</span></button>
+               </div>`
             : `<button class="btn-apply ${applied?'applied':''}" style="${isSoloLfg?'border-color:var(--success);color:var(--success)':'border-color:#b08fe8;color:#b08fe8'}" onclick="openApply('${l.id}')">
                 <span>${applied ? '✓ CONTACTED' : 'CONTACT'}</span>
               </button>`
@@ -1641,8 +1673,8 @@
       <div class="card-owner">
         <div class="owner-avatar">${l.owner.slice(0,2)}</div>
         <div class="owner-info">
-          <div class="owner-handle">${l.owner}</div>
-          <div class="owner-meta">${l.timezone || l.tz || ''} &nbsp;·&nbsp; ${l.playstyle || l.style || ''}</div>
+          <div class="owner-handle">${l.owner}${l.org ? ` <span style="font-size:9px;color:var(--accent2);letter-spacing:1px;border:1px solid rgba(232,168,79,0.3);padding:1px 5px;margin-left:4px">${l.org}</span>` : ''}</div>
+          <div class="owner-meta">${timezoneLabel(l.timezone || l.tz || '')} &nbsp;·&nbsp; ${l.playstyle || l.style || ''}</div>
         </div>
       </div>
       <div class="card-roles">
@@ -1655,7 +1687,10 @@
           ${l.expires_at ? ' · expires ' + new Date(l.expires_at).toLocaleDateString() : ''}
         </div>
         ${isMine
-          ? `<button class="btn-apply" style="border-color:var(--danger);color:var(--danger)" onclick="deleteListing('${l.id}')"><span>DELETE</span></button>`
+          ? `<div style="display:flex;gap:6px">
+              <button class="btn-apply" style="border-color:var(--accent);color:var(--accent)" onclick="bumpListing('${l.id}')"><span>BUMP</span></button>
+              <button class="btn-apply" style="border-color:var(--danger);color:var(--danger)" onclick="deleteListing('${l.id}')"><span>DELETE</span></button>
+             </div>`
           : `<button class="btn-apply ${applied?'applied':''}" onclick="openApply('${l.id}')">
               <span>${applied ? '✓ APPLIED' : 'APPLY'}</span>
             </button>`
@@ -1823,11 +1858,12 @@
       try {
         const { data, error } = await sb.from('listings').insert([{
           ship, mission, owner, timezone: system, playstyle: style,
-          roles: currentPostType, // store post type in roles field as fallback
+          roles: currentPostType,
           discord, owner_discord: document.getElementById('f-discord').value.trim() || discordUser,
           expires_at: new Date(Date.now() + 48*60*60*1000).toISOString(),
           post_type: currentPostType,
-          solo_note
+          solo_note,
+          org: document.getElementById('f-org').value.trim() || null
         }]).select();
         if (error) throw error;
         document.getElementById('f-solo-ship').value = '';
@@ -1872,12 +1908,14 @@
     btn.disabled = true;
     try {
       const { data, error } = await sb.from('listings').insert([{
-        ship, mission, owner, timezone: system, playstyle: style, roles: roles.join(','), discord, owner_discord: document.getElementById('f-discord').value.trim() || discordUser, expires_at: new Date(Date.now() + 48*60*60*1000).toISOString()
+        ship, mission, owner, timezone: system, playstyle: style, roles: roles.join(','), discord, owner_discord: document.getElementById('f-discord').value.trim() || discordUser, expires_at: new Date(Date.now() + 48*60*60*1000).toISOString(),
+        org: document.getElementById('f-org').value.trim() || null
       }]).select();
       if (error) throw error;
       document.getElementById('f-ship').value = '';
       document.getElementById('f-ship-search').value = '';
       document.getElementById('f-discord').value = '';
+      document.getElementById('f-org').value = '';
       if (document.getElementById('f-owner')) document.getElementById('f-owner').value = '';
       document.querySelectorAll('#roles-grid .role-counter').forEach(el => {
         el.querySelector('.role-count').textContent = '0';
