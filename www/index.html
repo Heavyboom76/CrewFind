@@ -951,6 +951,68 @@
   /* EXPIRY COUNTDOWN */
   .expiry-soon { color: var(--danger) !important; }
   .expiry-ok { color: var(--text-dim); }
+
+  /* IN-VERSE STATUS TOGGLE */
+  .status-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    background: var(--bg2);
+    margin-bottom: 16px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.2s;
+  }
+  .status-toggle:hover { border-color: var(--border-bright); }
+  .status-toggle.in-verse {
+    border-color: rgba(79,232,168,0.4);
+    background: rgba(79,232,168,0.05);
+  }
+  .status-dot-lg {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--text-dim);
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  .status-toggle.in-verse .status-dot-lg {
+    background: var(--success);
+    box-shadow: 0 0 8px var(--success);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  .status-toggle-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    flex: 1;
+  }
+  .status-toggle.in-verse .status-toggle-label { color: var(--success); }
+  .status-toggle-hint {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 0.5px;
+  }
+
+  /* IN-VERSE dot on browse cards */
+  .card-status-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 4px;
+    vertical-align: middle;
+    background: var(--text-dim);
+    flex-shrink: 0;
+  }
+  .card-status-dot.in-verse {
+    background: var(--success);
+    box-shadow: 0 0 5px var(--success);
+    animation: pulse 2s ease-in-out infinite;
+  }
 </style>
 </head>
 <body>
@@ -1042,6 +1104,12 @@
     <div id="tab-my-posts" style="display:none">
       <div class="hud-line">
         <div class="hud-stat">YOUR LISTINGS: <b id="my-post-count">0</b></div>
+      </div>
+      <!-- In-Verse Status Toggle -->
+      <div class="status-toggle" id="status-toggle" onclick="toggleInVerseStatus()">
+        <div class="status-dot-lg" id="status-dot-lg"></div>
+        <div class="status-toggle-label" id="status-toggle-label">OFFLINE — TAP TO SET IN VERSE</div>
+        <div class="status-toggle-hint" id="status-toggle-hint">shows on your listings</div>
       </div>
       <div class="listings" id="my-listings-grid"></div>
       <div class="empty" id="my-empty-state" style="display:block">[ NO ACTIVE LISTINGS — POST ONE TO GET STARTED ]</div>
@@ -1759,6 +1827,59 @@
     }
   }
 
+  // Player in-verse statuses — keyed by handle (uppercase)
+  let playerStatuses = {};
+  let myStatus = 'offline';
+
+  async function loadPlayerStatuses(handles) {
+    if (!handles || handles.length === 0) return;
+    try {
+      const { data } = await sb.from('players').select('handle, status').in('handle', handles);
+      if (data) data.forEach(p => { playerStatuses[p.handle.toUpperCase()] = p.status; });
+    } catch(e) { console.error('Status load error:', e); }
+  }
+
+  async function loadMyStatus() {
+    if (!currentHandle) return;
+    try {
+      const { data } = await sb.from('players').select('status').eq('handle', currentHandle).single();
+      myStatus = data?.status || 'offline';
+    } catch(e) { myStatus = 'offline'; }
+    updateStatusToggleUI();
+  }
+
+  function updateStatusToggleUI() {
+    const toggle = document.getElementById('status-toggle');
+    const label = document.getElementById('status-toggle-label');
+    if (!toggle || !label) return;
+    if (myStatus === 'in-verse') {
+      toggle.classList.add('in-verse');
+      label.textContent = 'IN VERSE — TAP TO GO OFFLINE';
+    } else {
+      toggle.classList.remove('in-verse');
+      label.textContent = 'OFFLINE — TAP TO SET IN VERSE';
+    }
+  }
+
+  async function toggleInVerseStatus() {
+    if (!currentHandle) { showToast('// LOGIN REQUIRED TO SET STATUS'); return; }
+    const newStatus = myStatus === 'in-verse' ? 'offline' : 'in-verse';
+    try {
+      await sb.from('players').upsert({ handle: currentHandle, status: newStatus, updated_at: new Date().toISOString() }, { onConflict: 'handle' });
+      myStatus = newStatus;
+      playerStatuses[currentHandle.toUpperCase()] = newStatus;
+      updateStatusToggleUI();
+      // Re-render cards to reflect new dot
+      const grid = document.getElementById('listings-grid');
+      if (grid && listings.length > 0) grid.innerHTML = listings.map(l => renderCard(l, false)).join('');
+      renderMyPosts();
+      showToast(newStatus === 'in-verse' ? '// STATUS: IN VERSE' : '// STATUS: OFFLINE');
+    } catch(e) {
+      console.error('Status toggle error:', e);
+      showToast('// ERROR: Could not update status');
+    }
+  }
+
   function renderCard(l, isMine) {
     const applied = l.applied;
     isMine = isMine || (currentHandle && l.owner && l.owner.toUpperCase() === currentHandle.toUpperCase());
@@ -1780,7 +1901,7 @@
         <div class="card-owner">
           <div class="owner-avatar" style="border-color:${isSoloLfg?'rgba(79,232,168,0.4)':'rgba(176,143,232,0.4)'};background:${isSoloLfg?'rgba(79,232,168,0.1)':'rgba(176,143,232,0.1)'};color:${isSoloLfg?'var(--success)':'#b08fe8'}">${l.owner.slice(0,2)}</div>
           <div class="owner-info">
-            <div class="owner-handle">${l.owner}${l.org ? ` <span style="font-size:9px;color:var(--accent2);letter-spacing:1px;border:1px solid rgba(232,168,79,0.3);padding:1px 5px;margin-left:4px">${l.org}</span>` : ''}</div>
+            <div class="owner-handle"><span class="card-status-dot ${playerStatuses[l.owner?.toUpperCase()] === 'in-verse' ? 'in-verse' : ''}"></span>${l.owner}${l.org ? ` <span style="font-size:9px;color:var(--accent2);letter-spacing:1px;border:1px solid rgba(232,168,79,0.3);padding:1px 5px;margin-left:4px">${l.org}</span>` : ''}</div>
             <div class="owner-meta">${timezoneLabel(l.timezone || '')} &nbsp;·&nbsp; ${l.playstyle || ''}</div>
           </div>
         </div>
@@ -1813,7 +1934,7 @@
       <div class="card-owner">
         <div class="owner-avatar">${l.owner.slice(0,2)}</div>
         <div class="owner-info">
-          <div class="owner-handle">${l.owner}${l.org ? ` <span style="font-size:9px;color:var(--accent2);letter-spacing:1px;border:1px solid rgba(232,168,79,0.3);padding:1px 5px;margin-left:4px">${l.org}</span>` : ''}</div>
+          <div class="owner-handle"><span class="card-status-dot ${playerStatuses[l.owner?.toUpperCase()] === 'in-verse' ? 'in-verse' : ''}"></span>${l.owner}${l.org ? ` <span style="font-size:9px;color:var(--accent2);letter-spacing:1px;border:1px solid rgba(232,168,79,0.3);padding:1px 5px;margin-left:4px">${l.org}</span>` : ''}</div>
           <div class="owner-meta">${timezoneLabel(l.timezone || l.tz || '')} &nbsp;·&nbsp; ${l.playstyle || l.style || ''}</div>
         </div>
       </div>
@@ -1859,6 +1980,9 @@
         roles: typeof l.roles === 'string' ? l.roles.split(',') : (l.roles || []),
         applied: appliedIds.has(l.id)
       }));
+      // Load statuses for all unique owners
+      const handles = [...new Set(listings.map(l => l.owner).filter(Boolean))];
+      await loadPlayerStatuses(handles);
     } catch(e) {
       console.error('Load error:', e);
       grid.innerHTML = '<div style="padding:40px;text-align:center;font-family:monospace;color:#e84f4f;letter-spacing:1px">[ CONNECTION ERROR — RETRY ]</div>';
@@ -1925,7 +2049,10 @@
     document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
     document.getElementById('tab-browse').style.display = tab === 'browse' ? '' : 'none';
     document.getElementById('tab-my-posts').style.display = tab === 'my-posts' ? '' : 'none';
-    if (tab === 'my-posts') renderMyPosts().catch(e => console.error(e));
+    if (tab === 'my-posts') {
+      renderMyPosts().catch(e => console.error(e));
+      loadMyStatus();
+    }
   }
 
   function setTabById(tab, btn) {
