@@ -1923,15 +1923,16 @@
       const newExpiry = new Date(Date.now() + 48*60*60*1000).toISOString();
       const { error } = await sb.from('listings').update({ expires_at: newExpiry }).eq('id', id);
       if (error) throw error;
-      // Update in-memory arrays so re-render shows new time immediately
+      // Update in-memory arrays immediately
       const l = listings.find(x => String(x.id) === String(id));
       if (l) l.expires_at = newExpiry;
       const m = myPosts.find(x => String(x.id) === String(id));
       if (m) m.expires_at = newExpiry;
-      // Re-render both tabs
+      // Re-render from memory — no Supabase re-fetch needed
       const grid = document.getElementById('listings-grid');
       if (grid) grid.innerHTML = listings.map(l => renderCard(l, false)).join('');
-      renderMyPosts();
+      const myGrid = document.getElementById('my-listings-grid');
+      if (myGrid && myPosts.length > 0) myGrid.innerHTML = myPosts.map(l => renderCard(l, true)).join('');
       showToast('// LISTING REFRESHED — 48H RESET');
     } catch(e) {
       console.error('Bump error:', e);
