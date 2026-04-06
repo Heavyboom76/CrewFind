@@ -924,6 +924,86 @@
     background: rgba(79,232,168,0.08);
   }
 
+  /* ORG RECRUITMENT CARD */
+  .card.org-recruit {
+    border-color: rgba(232,168,79,0.3);
+    background: linear-gradient(135deg, var(--bg2) 0%, rgba(232,168,79,0.03) 100%);
+    padding: 0;
+    overflow: hidden;
+  }
+  .card.org-recruit::before {
+    background: linear-gradient(90deg, transparent, var(--accent2), transparent);
+  }
+  .card.org-recruit:hover { border-color: rgba(232,168,79,0.55); }
+  .org-poster-img {
+    width: 100%;
+    max-height: 160px;
+    object-fit: cover;
+    display: block;
+    border-bottom: 1px solid rgba(232,168,79,0.2);
+  }
+  .org-card-body { padding: 16px 20px 20px; }
+  .org-badge {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border: 1px solid rgba(232,168,79,0.4);
+    color: var(--accent2);
+    background: rgba(232,168,79,0.07);
+  }
+  .org-pitch {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.5px;
+    margin: 10px 0 14px;
+    line-height: 1.6;
+    border-left: 2px solid rgba(232,168,79,0.3);
+    padding-left: 10px;
+  }
+
+  /* Image upload area */
+  .img-upload-area {
+    border: 1px dashed var(--border-bright);
+    padding: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: var(--bg);
+    position: relative;
+  }
+  .img-upload-area:hover { border-color: var(--accent2); }
+  .img-upload-area input[type=file] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+  .img-upload-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+  .img-preview {
+    width: 100%;
+    max-height: 120px;
+    object-fit: cover;
+    margin-top: 10px;
+    display: none;
+    border: 1px solid var(--border);
+  }
+  .post-type-btn.active.org-btn {
+    background: rgba(232,168,79,0.08);
+    color: var(--accent2);
+  }
+
   /* SEARCH BAR */
   .search-bar-wrap {
     position: relative;
@@ -1038,7 +1118,7 @@
 <body>
 <div class="scanlines"></div>
 
-<!-- iOS Install Banner — only shows on iOS Safari when not installed as PWA -->
+<!-- iOS Install Banner -->
 <div id="ios-install-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:400;background:#0d1117;border-top:1px solid rgba(96,180,255,0.35);padding:12px 16px;padding-bottom:calc(12px + env(safe-area-inset-bottom));">
   <div style="display:flex;align-items:center;gap:12px;max-width:520px;margin:0 auto">
     <img src="/apple-touch-icon.png" style="width:40px;height:40px;border-radius:9px;flex-shrink:0" />
@@ -1126,6 +1206,7 @@
         <button class="filter-chip" id="fc-escort" onclick="filterBy('escort', this)">Escort</button>
         <button class="filter-chip" id="fc-ground" onclick="filterBy('ground', this)">Ground</button>
         <button class="filter-chip" id="fc-solo" onclick="filterBy('solo', this)">Solo/LFG</button>
+        <button class="filter-chip" id="fc-org" onclick="filterBy('org', this)">Org Recruit</button>
       </div>
 
       <div class="listings" id="listings-grid"></div>
@@ -1161,6 +1242,37 @@
       <button class="post-type-btn active" id="ptype-crew" onclick="setPostType('crew')">⚡ LFM Crew</button>
       <button class="post-type-btn lfg-btn" id="ptype-lfg" onclick="setPostType('lfg')">🔍 LFG Solo</button>
       <button class="post-type-btn lfm-btn" id="ptype-lfm" onclick="setPostType('lfm')">👥 LFM Solo</button>
+      <button class="post-type-btn org-btn" id="ptype-org" onclick="setPostType('org')">🏴 Org</button>
+    </div>
+
+    <!-- ORG RECRUIT FIELDS -->
+    <div id="org-fields" style="display:none">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Org Name</label>
+          <input class="form-input" id="f-org-name" placeholder="e.g. Redacted Operations" maxlength="60" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Org Tag</label>
+          <input class="form-input" id="f-org-tag" placeholder="e.g. REDACTED" maxlength="12" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Recruitment Pitch <span style="color:var(--text-dim);font-size:9px">(max 280 chars)</span></label>
+        <textarea class="form-input" id="f-org-pitch" placeholder="Tell pilots what your org is about, what you do, and why they should join..." maxlength="280" rows="4" style="resize:none;line-height:1.5"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Roles Recruiting <span style="color:var(--text-dim);font-size:9px">(optional)</span></label>
+        <input class="form-input" id="f-org-roles" placeholder="e.g. Pilots, Miners, Security, Any..." maxlength="80" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Org Poster <span style="color:var(--text-dim);font-size:9px">(optional — JPEG, PNG, BMP)</span></label>
+        <div class="img-upload-area" id="img-upload-area">
+          <input type="file" id="f-org-poster" accept="image/jpeg,image/png,image/bmp,image/jpg" onchange="previewOrgPoster(this)" />
+          <div class="img-upload-label" id="img-upload-label">📁 TAP TO UPLOAD ORG POSTER</div>
+          <img id="img-preview" class="img-preview" alt="Org poster preview" />
+        </div>
+      </div>
     </div>
 
     <!-- CREW POST FIELDS -->
@@ -1608,20 +1720,18 @@
 
   function setPostType(type) {
     currentPostType = type;
-    // Update toggle buttons
     document.querySelectorAll('.post-type-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('ptype-' + type).classList.add('active');
-    // Toggle field sections
     const isSolo = type === 'lfg' || type === 'lfm';
-    document.getElementById('crew-fields').style.display = isSolo ? 'none' : '';
+    const isOrg = type === 'org';
+    document.getElementById('crew-fields').style.display = (!isSolo && !isOrg) ? '' : 'none';
     document.getElementById('solo-fields').style.display = isSolo ? '' : 'none';
-    // Update modal title and button text
-    const titles = { crew: '// New Crew Listing', lfg: '// Looking For Crew', lfm: '// Solo Players LFM' };
-    const btns = { crew: 'BROADCAST LISTING', lfg: 'BROADCAST LFG POST', lfm: 'BROADCAST LFM POST' };
-    const notes = { lfg: 'What crew / ship are you hoping to join?', lfm: 'What activity are you recruiting solo players for?' };
+    document.getElementById('org-fields').style.display = isOrg ? '' : 'none';
+    const titles = { crew: '// New Crew Listing', lfg: '// Looking For Crew', lfm: '// Solo Players LFM', org: '// Org Recruitment Post' };
+    const btns = { crew: 'BROADCAST LISTING', lfg: 'BROADCAST LFG POST', lfm: 'BROADCAST LFM POST', org: 'BROADCAST ORG RECRUITMENT' };
     document.getElementById('post-modal-title').textContent = titles[type];
     document.getElementById('btn-submit-post').textContent = btns[type];
-    if (isSolo && notes[type]) {
+    if (isSolo) {
       document.getElementById('f-solo-note').placeholder = type === 'lfg'
         ? 'e.g. Looking to join a mining fleet, own Prospector'
         : 'e.g. Forming a wing of fighters for bounty — 3 solos needed';
@@ -1817,7 +1927,9 @@
       return (l.ship || '').toLowerCase().includes(q) ||
              (l.owner || '').toLowerCase().includes(q) ||
              (l.org || '').toLowerCase().includes(q) ||
-             (l.solo_note || '').toLowerCase().includes(q);
+             (l.org_name || '').toLowerCase().includes(q) ||
+             (l.solo_note || '').toLowerCase().includes(q) ||
+             (l.org_roles || '').toLowerCase().includes(q);
     });
     if (filtered.length === 0) {
       grid.innerHTML = '';
@@ -1918,6 +2030,44 @@
     const isSoloLfg = l.post_type === 'lfg';
     const isSoloLfm = l.post_type === 'lfm';
     const isSolo = isSoloLfg || isSoloLfm;
+    const isOrg = l.post_type === 'org';
+
+    if (isOrg) {
+      return `
+      <div class="card org-recruit" style="animation-delay:${Math.random()*0.2}s">
+        ${l.org_poster_url ? `<img class="org-poster-img" src="${l.org_poster_url}" alt="Org poster" onerror="this.style.display='none'" />` : ''}
+        <div class="org-card-body">
+          <div class="card-header" style="margin-bottom:10px">
+            <div>
+              <div class="ship-name" style="color:var(--accent2)">${(l.org_name || l.org || l.owner).toUpperCase()}</div>
+              ${l.org ? `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-dim);letter-spacing:1px;margin-top:2px">[${l.org}]</div>` : ''}
+            </div>
+            <span class="org-badge">🏴 ORG RECRUITING</span>
+          </div>
+          <div class="card-owner" style="margin-bottom:10px;padding-bottom:10px">
+            <div class="owner-avatar" style="border-color:rgba(232,168,79,0.4);background:rgba(232,168,79,0.1);color:var(--accent2)"><span class="card-status-dot ${playerStatuses[l.owner?.toUpperCase()] === 'in-verse' ? 'in-verse' : ''}"></span>${l.owner.slice(0,2)}</div>
+            <div class="owner-info">
+              <div class="owner-handle"><span class="card-status-dot ${playerStatuses[l.owner?.toUpperCase()] === 'in-verse' ? 'in-verse' : ''}"></span>${l.owner}</div>
+              <div class="owner-meta">${timezoneLabel(l.timezone || '')} &nbsp;·&nbsp; ${l.playstyle || ''}</div>
+            </div>
+          </div>
+          ${l.solo_note ? `<div class="org-pitch">${l.solo_note}</div>` : ''}
+          ${l.org_roles ? `<div style="margin-bottom:12px"><span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase">RECRUITING: </span><span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--accent2)">${l.org_roles}</span></div>` : ''}
+          <div class="card-footer">
+            <div class="card-meta ${expiryClass(l.expires_at)}">${expiryCountdown(l.expires_at)}</div>
+            ${isMine
+              ? `<div style="display:flex;gap:6px">
+                  <button class="btn-apply" style="border-color:var(--accent);color:var(--accent)" onclick="bumpListing('${l.id}')"><span>BUMP</span></button>
+                  <button class="btn-apply" style="border-color:var(--danger);color:var(--danger)" onclick="deleteListing('${l.id}')"><span>DELETE</span></button>
+                 </div>`
+              : `<button class="btn-apply ${l.applied?'applied':''}" style="border-color:var(--accent2);color:var(--accent2)" onclick="openApply('${l.id}')">
+                  <span>${l.applied ? '✓ CONTACTED' : 'CONTACT ORG'}</span>
+                </button>`
+            }
+          </div>
+        </div>
+      </div>`;
+    }
 
     if (isSolo) {
       const soloClass = isSoloLfg ? 'solo-lfg' : 'solo-lfm';
@@ -2000,6 +2150,8 @@
       let query = sb.from('listings').select('*').order('created_at', { ascending: false });
       if (activeFilter === 'solo') {
         query = query.in('post_type', ['lfg', 'lfm']);
+      } else if (activeFilter === 'org') {
+        query = query.eq('post_type', 'org');
       } else if (activeFilter !== 'all') {
         query = query.eq('mission', activeFilter).is('post_type', null);
       }
@@ -2068,6 +2220,20 @@
     }
   }
 
+  function previewOrgPoster(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const preview = document.getElementById('img-preview');
+    const label = document.getElementById('img-upload-label');
+    const reader = new FileReader();
+    reader.onload = e => {
+      preview.src = e.target.result;
+      preview.style.display = 'block';
+      label.textContent = '✓ ' + file.name;
+    };
+    reader.readAsDataURL(file);
+  }
+
   function filterBy(type, btn) {
     activeFilter = type;
     document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
@@ -2108,6 +2274,13 @@
     document.getElementById('post-modal').classList.remove('open');
     document.body.style.overflow = '';
     setPostType('crew');
+    // Reset org fields
+    const orgFields = ['f-org-name','f-org-tag','f-org-pitch','f-org-roles'];
+    orgFields.forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+    const preview = document.getElementById('img-preview');
+    if (preview) preview.style.display = 'none';
+    const label = document.getElementById('img-upload-label');
+    if (label) label.textContent = '📁 TAP TO UPLOAD ORG POSTER';
   }
 
   function closeApplyModal() {
@@ -2142,6 +2315,68 @@
 
   async function submitPost() {
     const isSolo = currentPostType === 'lfg' || currentPostType === 'lfm';
+    const isOrg = currentPostType === 'org';
+
+    if (isOrg) {
+      const orgName = document.getElementById('f-org-name').value.trim();
+      const orgTag = document.getElementById('f-org-tag').value.trim();
+      const pitch = document.getElementById('f-org-pitch').value.trim();
+      const orgRoles = document.getElementById('f-org-roles').value.trim();
+      if (!orgName) { showToast('// ERROR: Org name required'); return; }
+      if (!pitch) { showToast('// ERROR: Recruitment pitch required'); return; }
+      const system = document.getElementById('f-system').value;
+      const style = document.getElementById('f-style').value;
+      const discord = document.getElementById('f-discord').value.trim() || 'N/A';
+      const owner = currentHandle || 'PILOT';
+      const discordUser = currentUser ? (currentUser.user_metadata?.custom_claims?.global_name || currentUser.user_metadata?.full_name || '') : (localStorage.getItem('discord_username') || '');
+      const btn = document.getElementById('btn-submit-post');
+      btn.textContent = 'TRANSMITTING...';
+      btn.disabled = true;
+      try {
+        // Upload image if provided
+        let org_poster_url = null;
+        const fileInput = document.getElementById('f-org-poster');
+        if (fileInput && fileInput.files[0]) {
+          const file = fileInput.files[0];
+          const ext = file.name.split('.').pop();
+          const fileName = `${owner}_${Date.now()}.${ext}`;
+          const { data: uploadData, error: uploadError } = await sb.storage
+            .from('org-posters')
+            .upload(fileName, file, { contentType: file.type, upsert: true });
+          if (!uploadError) {
+            const { data: urlData } = sb.storage.from('org-posters').getPublicUrl(fileName);
+            org_poster_url = urlData?.publicUrl || null;
+          }
+        }
+        const { error } = await sb.from('listings').insert([{
+          ship: orgName, mission: 'org', owner, timezone: system, playstyle: style,
+          roles: 'org', discord, owner_discord: discordUser || discord,
+          expires_at: new Date(Date.now() + 48*60*60*1000).toISOString(),
+          post_type: 'org', solo_note: pitch,
+          org: orgTag || null, org_name: orgName,
+          org_roles: orgRoles || null, org_poster_url
+        }]);
+        if (error) throw error;
+        document.getElementById('f-org-name').value = '';
+        document.getElementById('f-org-tag').value = '';
+        document.getElementById('f-org-pitch').value = '';
+        document.getElementById('f-org-roles').value = '';
+        document.getElementById('f-org-poster').value = '';
+        document.getElementById('f-discord').value = '';
+        document.getElementById('img-preview').style.display = 'none';
+        document.getElementById('img-upload-label').textContent = '📁 TAP TO UPLOAD ORG POSTER';
+        closePostModal();
+        await renderListings();
+        showToast('// ORG RECRUITMENT BROADCAST TO SECTOR');
+      } catch(e) {
+        console.error('Org post error:', e);
+        showToast('// ERROR: Could not post org listing');
+      } finally {
+        btn.textContent = 'BROADCAST ORG RECRUITMENT';
+        btn.disabled = false;
+      }
+      return;
+    }
 
     if (isSolo) {
       const ship = document.getElementById('f-solo-ship').value.trim() || 'No Ship Listed';
@@ -2240,13 +2475,30 @@
     applyTarget = l;
     const savedDiscord = localStorage.getItem('discord_username') || '';
     const isSolo = l.post_type === 'lfg' || l.post_type === 'lfm';
+    const isOrg = l.post_type === 'org';
     const contactHandle = l.discord || l.owner;
     const discordBtn = `<button onclick="copyDiscord('${contactHandle}')" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid #5865F2;color:#5865F2;background:transparent;cursor:pointer;letter-spacing:1px;font-family:'Share Tech Mono',monospace;font-size:10px;margin-bottom:8px;width:100%;justify-content:center;-webkit-tap-highlight-color:transparent;" id="discord-copy-btn">
       <svg width="14" height="14" viewBox="0 0 71 55" fill="none"><path d="M60.1 4.9A58.5 58.5 0 0 0 45.5.9a.2.2 0 0 0-.2.1 40.8 40.8 0 0 0-1.8 3.7 54 54 0 0 0-16.2 0 37.4 37.4 0 0 0-1.8-3.7.2.2 0 0 0-.2-.1A58.3 58.3 0 0 0 10.8 4.9a.2.2 0 0 0-.1.1C1.6 18.1-.9 31 .3 43.7a.2.2 0 0 0 .1.2 58.8 58.8 0 0 0 17.7 8.9.2.2 0 0 0 .2-.1 42 42 0 0 0 3.6-5.9.2.2 0 0 0-.1-.3 38.7 38.7 0 0 1-5.5-2.6.2.2 0 0 1 0-.4l1.1-.8a.2.2 0 0 1 .2 0c11.5 5.3 24 5.3 35.4 0a.2.2 0 0 1 .2 0l1.1.8a.2.2 0 0 1 0 .4 36.1 36.1 0 0 1-5.5 2.6.2.2 0 0 0-.1.3 47.1 47.1 0 0 0 3.6 5.9.2.2 0 0 0 .2.1 58.6 58.6 0 0 0 17.8-8.9.2.2 0 0 0 .1-.2c1.4-14.8-2.4-27.6-10.4-39a.2.2 0 0 0-.1 0ZM23.7 36.2c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2c3.6 0 6.5 3.3 6.4 7.2 0 4-2.8 7.2-6.4 7.2Zm23.6 0c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2c3.6 0 6.5 3.3 6.4 7.2 0 4-2.8 7.2-6.4 7.2Z" fill="#5865F2"/></svg>
       COPY DISCORD TAG — @${contactHandle}
     </button>`;
 
-    if (isSolo) {
+    if (isOrg) {
+      document.getElementById('apply-modal-title').textContent = '// Contact Org — ' + (l.org_name || l.org || l.owner).toUpperCase();
+      document.getElementById('apply-modal-body').innerHTML = `
+        <div style="margin-bottom:18px;padding:14px;border:1px solid rgba(232,168,79,0.3);background:var(--bg)">
+          ${l.org_poster_url ? `<img src="${l.org_poster_url}" style="width:100%;max-height:120px;object-fit:cover;margin-bottom:10px;border:1px solid var(--border)" onerror="this.style.display='none'" />` : ''}
+          <div class="hud-stat" style="margin-bottom:6px">ORG: <b style="color:var(--accent2)">${l.org_name || l.org || l.owner}</b>${l.org ? ` <span style="font-size:9px;color:var(--text-dim)">[${l.org}]</span>` : ''}</div>
+          ${l.solo_note ? `<div style="font-size:10px;color:var(--text-dim);font-style:italic;border-left:2px solid rgba(232,168,79,0.3);padding-left:8px;margin-top:8px">${l.solo_note}</div>` : ''}
+          ${l.org_roles ? `<div style="margin-top:8px;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--accent2)">RECRUITING: ${l.org_roles}</div>` : ''}
+        </div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-dim);letter-spacing:1px;margin-bottom:12px">Reach out to the org rep on Discord:</div>
+        ${discordBtn}
+        <div style="text-align:center;margin-bottom:14px">
+          <a href="javascript:void(0)" onclick="openExternalUrl('https://discord.gg/AzW5aVNXky')" style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-dim);letter-spacing:1px;">or join the CrewFind Discord →</a>
+        </div>
+        <button class="btn-post" id="btn-transmit" data-id="${id}" onclick="submitApply(this.dataset.id)">MARK AS CONTACTED</button>
+      `;
+    } else if (isSolo) {
       document.getElementById('apply-modal-title').textContent = l.post_type === 'lfg' ? '// Contact Pilot — LFG' : '// Contact Pilot — LFM Solo';
       document.getElementById('apply-modal-body').innerHTML = `
         <div style="margin-bottom:18px;padding:14px;border:1px solid var(--border);background:var(--bg)">
@@ -2449,7 +2701,7 @@
     }
   }
 
-  // iOS PWA install banner — show on iOS Safari only, not when already installed
+  // iOS PWA install banner
   (function() {
     const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
     const isInStandaloneMode = window.navigator.standalone === true;
