@@ -903,6 +903,54 @@
     color: var(--success);
     background: rgba(79,232,168,0.08);
   }
+
+  /* SEARCH BAR */
+  .search-bar-wrap {
+    position: relative;
+    margin-bottom: 14px;
+  }
+  .search-bar {
+    width: 100%;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 9px 14px 9px 36px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    outline: none;
+    transition: border-color 0.15s;
+    letter-spacing: 0.5px;
+  }
+  .search-bar:focus { border-color: var(--accent); }
+  .search-bar::placeholder { color: var(--text-dim); }
+  .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-dim);
+    font-size: 13px;
+    pointer-events: none;
+  }
+  .search-clear {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 14px;
+    cursor: pointer;
+    padding: 2px 6px;
+    display: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .search-clear.visible { display: block; }
+
+  /* EXPIRY COUNTDOWN */
+  .expiry-soon { color: var(--danger) !important; }
+  .expiry-ok { color: var(--text-dim); }
 </style>
 </head>
 <body>
@@ -964,6 +1012,13 @@
           <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#5a7a9a;letter-spacing:1px;margin-top:2px">discord.gg/AzW5aVNXky — tap to join</div>
         </div>
       </div>
+      <!-- Search bar -->
+      <div class="search-bar-wrap">
+        <span class="search-icon">⌕</span>
+        <input class="search-bar" id="listing-search" placeholder="Search ship, pilot, org..." autocomplete="off" oninput="onSearchInput(this.value)" />
+        <button class="search-clear" id="search-clear-btn" onclick="clearSearch()">✕</button>
+      </div>
+
         <span class="filter-label">Mission:</span>
         <button class="filter-chip active" id="fc-all" onclick="filterBy('all', this)">All</button>
         <button class="filter-chip" id="fc-bounty" onclick="filterBy('bounty', this)">Bounty</button>
@@ -1596,6 +1651,64 @@
     );
   }
 
+  function expiryCountdown(expires_at) {
+    if (!expires_at) return '';
+    const diff = new Date(expires_at) - new Date();
+    if (diff <= 0) return 'EXPIRED';
+    const h = Math.floor(diff / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    if (h >= 24) return `expires in ${Math.floor(h/24)}d ${h%24}h`;
+    if (h > 0) return `expires in ${h}h ${m}m`;
+    return `expires in ${m}m`;
+  }
+
+  function expiryClass(expires_at) {
+    if (!expires_at) return '';
+    const diff = new Date(expires_at) - new Date();
+    return diff < 6 * 3600000 ? 'expiry-soon' : 'expiry-ok';
+  }
+
+  // SEARCH
+  let searchQuery = '';
+
+  function onSearchInput(val) {
+    searchQuery = val.trim().toLowerCase();
+    document.getElementById('search-clear-btn').classList.toggle('visible', searchQuery.length > 0);
+    applySearchFilter();
+  }
+
+  function clearSearch() {
+    document.getElementById('listing-search').value = '';
+    searchQuery = '';
+    document.getElementById('search-clear-btn').classList.remove('visible');
+    applySearchFilter();
+  }
+
+  function applySearchFilter() {
+    const grid = document.getElementById('listings-grid');
+    const empty = document.getElementById('empty-state');
+    if (!searchQuery) {
+      grid.innerHTML = listings.map(l => renderCard(l, false)).join('');
+      empty.style.display = listings.length === 0 ? 'block' : 'none';
+      return;
+    }
+    const filtered = listings.filter(l => {
+      const q = searchQuery;
+      return (l.ship || '').toLowerCase().includes(q) ||
+             (l.owner || '').toLowerCase().includes(q) ||
+             (l.org || '').toLowerCase().includes(q) ||
+             (l.solo_note || '').toLowerCase().includes(q);
+    });
+    if (filtered.length === 0) {
+      grid.innerHTML = '';
+      empty.style.display = 'block';
+      document.getElementById('empty-state').textContent = '[ NO RESULTS — TRY A DIFFERENT SEARCH ]';
+    } else {
+      empty.style.display = 'none';
+      grid.innerHTML = filtered.map(l => renderCard(l, false)).join('');
+    }
+  }
+
   function timezoneLabel(tz) {
     const map = {
       'NA-W': 'NA West', 'NA-E': 'NA East',
@@ -1647,8 +1760,8 @@
         <div class="mission-type ${missionColor(l.mission)}" style="margin-bottom:12px;display:inline-block">${missionLabel(l.mission)}</div>
         ${l.solo_note ? `<div class="solo-note">"${l.solo_note}"</div>` : ''}
         <div class="card-footer">
-          <div class="card-meta">
-            ${l.expires_at ? 'expires ' + new Date(l.expires_at).toLocaleDateString() : ''}
+          <div class="card-meta ${expiryClass(l.expires_at)}">
+            ${expiryCountdown(l.expires_at)}
           </div>
           ${isMine
             ? `<div style="display:flex;gap:6px">
@@ -1682,9 +1795,9 @@
         ${groupedRoles.map(r => `<span class="role-tag needed">${r}</span>`).join('')}
       </div>
       <div class="card-footer">
-        <div class="card-meta">
+        <div class="card-meta ${expiryClass(l.expires_at)}">
           ${l.roles.length} slot${l.roles.length>1?'s':''} open
-          ${l.expires_at ? ' · expires ' + new Date(l.expires_at).toLocaleDateString() : ''}
+          ${l.expires_at ? ' · ' + expiryCountdown(l.expires_at) : ''}
         </div>
         ${isMine
           ? `<div style="display:flex;gap:6px">
@@ -1776,6 +1889,7 @@
     activeFilter = type;
     document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
     btn.classList.add('active');
+    clearSearch();
     renderListings();
   }
 
