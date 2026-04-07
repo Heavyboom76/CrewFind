@@ -2740,6 +2740,15 @@
   })();
 
   // listeners handled inline
+
+  // PWA Service Worker registration
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(() => console.log('// SW: REGISTERED'))
+        .catch(e => console.log('// SW: FAILED', e));
+    });
+  }
 </script>
 </body>
 </html>
