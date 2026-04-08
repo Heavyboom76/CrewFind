@@ -11,6 +11,9 @@
   "plugins": {
     "Browser": {
       "presentationStyle": "popover"
+    },
+    "App": {
+      "appUrlOpen": true
     }
   }
 }
