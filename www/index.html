@@ -2613,14 +2613,45 @@
   var currentUser = null;
 
   async function signInWithDiscord() {
-    const { error } = await sb.auth.signInWithOAuth({
-      provider: 'discord',
-      options: {
-        redirectTo: 'https://sc-crewfind.com',
-        scopes: 'identify'
-      }
-    });
-    if (error) { console.error('Discord login error:', error); showToast('// ERROR: Could not connect to Discord'); }
+    if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+      const { data, error } = await sb.auth.signInWithOAuth({
+        provider: 'discord',
+        options: {
+          redirectTo: 'https://sc-crewfind.com',
+          scopes: 'identify',
+          skipBrowserRedirect: true
+        }
+      });
+      if (error) { console.error('Discord login error:', error); showToast('// ERROR: Could not connect to Discord'); return; }
+
+      await window.Capacitor.Plugins.Browser.open({ url: data.url });
+
+      window.Capacitor.Plugins.Browser.addListener('browserFinished', async () => {
+        const { data: { session } } = await sb.auth.getSession();
+        if (session) {
+          currentUser = session.user;
+          const discordUsername = session.user.user_metadata?.full_name ||
+                                  session.user.user_metadata?.name || 'PILOT';
+          currentHandle = discordUsername.toUpperCase().replace(/\s+/g, '_');
+          localStorage.setItem('rsi_handle', currentHandle);
+          localStorage.setItem('discord_username', session.user.user_metadata?.custom_claims?.global_name || discordUsername);
+          document.getElementById('pilot-handle').textContent = currentHandle;
+          document.getElementById('onboarding').style.display = 'none';
+          await renderListings();
+        } else {
+          showToast('// ERROR: Could not retrieve session');
+        }
+      });
+    } else {
+      const { error } = await sb.auth.signInWithOAuth({
+        provider: 'discord',
+        options: {
+          redirectTo: 'https://sc-crewfind.com',
+          scopes: 'identify'
+        }
+      });
+      if (error) { console.error('Discord login error:', error); showToast('// ERROR: Could not connect to Discord'); }
+    }
   }
 
   async function signOut() {
