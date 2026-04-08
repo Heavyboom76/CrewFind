@@ -2616,13 +2616,14 @@
     const { error } = await sb.auth.signInWithOAuth({
       provider: 'discord',
       options: {
-        redirectTo: 'com.crewfind.app://',
+        redirectTo: 'https://sc-crewfind.com',
         scopes: 'identify'
       }
     });
     if (error) { console.error('Discord login error:', error); showToast('// ERROR: Could not connect to Discord'); }
- }
-   async function signOut() {
+  }
+
+  async function signOut() {
     await sb.auth.signOut();
     currentHandle = '';
     currentUser = null;
@@ -2698,27 +2699,6 @@
     } else {
       window.open(url, '_blank');
     }
-  }
-
-  // Handle deep link redirect from Discord OAuth
-  if (window.Capacitor && window.Capacitor.isNativePlatform()) {
-    window.Capacitor.Plugins.App.addListener('appUrlOpen', async (data) => {
-      if (data.url && data.url.startsWith('com.crewfind.app://')) {
-        const url = new URL(data.url.replace('com.crewfind.app://', 'https://sc-crewfind.com/'));
-        const { data: { session } } = await sb.auth.exchangeCodeForSession(
-          url.searchParams.get('code')
-        );
-        if (session) {
-          currentUser = session.user;
-          const discordUsername = session.user.user_metadata?.full_name ||
-                                  session.user.user_metadata?.name || 'PILOT';
-          currentHandle = discordUsername.toUpperCase().replace(/\s+/g, '_');
-          localStorage.setItem('rsi_handle', currentHandle);
-          document.getElementById('pilot-handle').textContent = currentHandle;
-          document.getElementById('onboarding').style.display = 'none';
-        }
-      }
-    });
   }
 
   // iOS PWA install banner
