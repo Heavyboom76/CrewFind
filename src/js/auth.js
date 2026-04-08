@@ -10,6 +10,11 @@ export function setCurrentUser(user) { currentUser = user }
 export function setCurrentHandle(handle) { currentHandle = handle }
 export function setCurrentProfile(profile) { currentProfile = profile }
 
+// Getter functions for modules that need current values
+export function getCurrentUser() { return currentUser }
+export function getCurrentHandle() { return currentHandle }
+export function getCurrentProfile() { return currentProfile }
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 export async function initAuth() {
   try {
@@ -46,12 +51,12 @@ export async function initAuth() {
 
 async function handleSession(session) {
   currentUser = session.user
-  // Load or create profile
+  // Load profile — use maybeSingle so no error if profile doesn't exist yet
   const { data: profile } = await sb
     .from('profiles')
     .select('*')
     .eq('id', currentUser.id)
-    .single()
+    .maybeSingle()
 
   if (profile) {
     currentProfile = profile
@@ -69,7 +74,7 @@ async function handleSession(session) {
 export async function registerWithEmail() {
   const email = document.getElementById('reg-email')?.value?.trim()
   const password = document.getElementById('reg-password')?.value
-  const handle = document.getElementById('reg-handle')?.value?.trim()?.toUpperCase()
+  const handle = document.getElementById('reg-handle')?.value?.trim()
 
   if (!email || !password || !handle) {
     showToast('// ERROR: All fields required')
@@ -89,7 +94,7 @@ export async function registerWithEmail() {
       .from('profiles')
       .select('id')
       .eq('rsi_handle', handle)
-      .single()
+      .maybeSingle()
 
     if (existing) {
       showToast('// ERROR: RSI handle already taken')
@@ -109,8 +114,18 @@ export async function registerWithEmail() {
       created_at: new Date().toISOString()
     })
 
-    showToast('// ACCOUNT CREATED — Check email to verify')
+    // Profile created — update UI immediately
+    currentUser = data.user
+    currentProfile = { rsi_handle: handle, display_name: handle }
+    currentHandle = handle
+    localStorage.setItem('rsi_handle', handle)
+    updateNavHandle(handle)
+    hideOnboarding()
+    showToast('// WELCOME TO CREWFIND, ' + handle.toUpperCase())
     if (btn) { btn.textContent = 'CREATE ACCOUNT'; btn.disabled = false }
+    // Trigger listings render
+    const { renderListings } = await import('./listings.js')
+    await renderListings()
   } catch (e) {
     console.error('Register error:', e)
     showToast('// ERROR: ' + (e.message || 'Registration failed'))
@@ -162,7 +177,7 @@ export async function signOut() {
 
 // ── RSI Handle (guest) ────────────────────────────────────────────────────────
 export function saveHandle() {
-  const h = document.getElementById('onboard-handle')?.value?.trim()?.toUpperCase()
+  const h = document.getElementById('onboard-handle')?.value?.trim()
   if (!h) { showToast('// ERROR: Enter your RSI handle'); return }
   currentHandle = h
   localStorage.setItem('rsi_handle', h)
@@ -193,4 +208,9 @@ export function setOnboardView(view) {
   if (loginView) loginView.style.display = view === 'login' ? 'block' : 'none'
   if (registerView) registerView.style.display = view === 'register' ? 'block' : 'none'
   if (guestView) guestView.style.display = view === 'guest' ? 'block' : 'none'
+
+  // Update tab button highlights
+  document.querySelectorAll('.auth-tab-btn').forEach(btn => btn.classList.remove('active'))
+  const activeBtn = document.querySelector(`.auth-tab-btn[onclick*="'${view}'"]`)
+  if (activeBtn) activeBtn.classList.add('active')
 }

@@ -1,6 +1,6 @@
 import { sb } from './supabase.js'
 import { showToast } from './ui.js'
-import { currentHandle, currentUser } from './auth.js'
+import { getCurrentHandle, getCurrentUser } from './auth.js'
 import { renderListings } from './listings.js'
 
 let currentPostType = 'crew'
@@ -78,6 +78,8 @@ export function previewOrgPoster(input) {
 export async function submitPost() {
   const isSolo = currentPostType === 'lfg' || currentPostType === 'lfm'
   const isOrg = currentPostType === 'org'
+  const currentHandle = getCurrentHandle()
+  const currentUser = getCurrentUser()
   const owner = currentHandle || 'PILOT'
   const discordUser = currentUser
     ? (currentUser.user_metadata?.custom_claims?.global_name || currentUser.user_metadata?.full_name || '')

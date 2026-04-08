@@ -179,8 +179,6 @@
   .divider { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--text-dim); letter-spacing: 1px; text-align: center; margin-bottom: 16px; }
   .btn-ghost { width: 100%; padding: 12px; background: transparent; border: 1px solid var(--border-bright); color: var(--accent); font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; }
 </style>
-  <script type="module" crossorigin src="/assets/index-Dhq53Nv-.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/auth-DKa7Vr_R.js">
 </head>
 <body>
 <div class="scanlines"></div>
@@ -236,7 +234,7 @@
     <div id="onboard-register-view" style="display:none">
       <div class="form-group">
         <label class="form-label">RSI Handle</label>
-        <input class="form-input" id="reg-handle" placeholder="e.g. Cpt_HeavyBoom" maxlength="30" />
+        <input class="form-input" id="reg-handle" placeholder="e.g. HEAVYBOOM76" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()" maxlength="30" />
       </div>
       <div class="form-group">
         <label class="form-label">Email</label>
@@ -259,7 +257,7 @@
       </div>
       <div class="form-group">
         <label class="form-label">RSI Handle</label>
-        <input id="onboard-handle" class="form-input" placeholder="e.g. Cpt_HeavyBoom" />
+        <input id="onboard-handle" class="form-input" placeholder="e.g. VANGUARD_7" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()" />
       </div>
       <button class="btn-ghost" onclick="saveHandle()">ENTER THE VERSE</button>
     </div>
@@ -275,7 +273,6 @@
     <div class="nav-bottom">
       <button class="nav-tab active" id="tab-btn-browse" onclick="setTabById('browse', this)">Browse</button>
       <button class="nav-tab" id="tab-btn-my-posts" onclick="setTabById('my-posts', this)">My Posts</button>
-      <button class="nav-tab" id="tab-btn-profile" onclick="openOwnProfile()">My Profile</button>
       <div class="pilot-badge" onclick="changeHandle()">
         <div class="pilot-dot"></div>
         <span id="pilot-handle">---</span>
@@ -402,15 +399,6 @@
   </div>
 </div>
 
-<!-- PROFILE MODAL -->
-<div class="modal-overlay" id="profile-modal" onclick="if(event.target===this)closeProfile()">
-  <div class="modal" style="max-width:580px">
-    <button class="modal-close" onclick="closeProfile()">✕</button>
-    <div class="modal-title" id="profile-modal-handle">// Pilot Profile</div>
-    <div id="profile-modal-body"></div>
-  </div>
-</div>
-
 <!-- APPLY MODAL -->
 <div class="modal-overlay" id="apply-modal" onclick="if(event.target===this)closeApplyModal()">
   <div class="modal">
@@ -422,15 +410,14 @@
 
 <div class="toast" id="toast"></div>
 
+<script type="module" src="/main.js"></script>
 <script>
   // Proxy stubs so inline onclick handlers don't error before module loads
-   ['setTabById','openExternalUrl','signInWithDiscord','signOut','saveHandle','setOnboardView',
+  ['setTabById','openExternalUrl','signInWithDiscord','signOut','saveHandle','setOnboardView',
    'registerWithEmail','loginWithEmail','filterBy','onSearchInput','clearSearch','openApply',
    'closeApplyModal','submitApply','deleteListing','bumpListing','openPostModal','closePostModal',
    'submitPost','adjustRole','previewOrgPoster','setPostType','selectShip','toggleInVerseStatus',
-   'changeHandle','copyDiscord','openProfile','closeProfile','openOwnProfile','submitRating',
-   'saveProfileField','triggerAvatarUpload','uploadAvatar','toggleAddShip','addShipToHangar',
-   'removeShipFromHangar','copyToClipboard','setRating','selectHangarShip'].forEach(fn => {
+   'changeHandle','copyDiscord'].forEach(fn => {
     window[fn] = window[fn] || function(...args) {
       document.addEventListener('crewfind:ready', () => window[fn](...args), { once: true })
     }

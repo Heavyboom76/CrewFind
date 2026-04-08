@@ -1,6 +1,6 @@
 import { sb } from './supabase.js'
 import { showToast, missionLabel, expiryLabel, isExpiringSoon, openExternalUrl } from './ui.js'
-import { currentHandle, currentUser } from './auth.js'
+import { getCurrentHandle, getCurrentUser } from './auth.js'
 
 export let listings = []
 export let myPosts = []
@@ -71,6 +71,7 @@ async function loadPlayerStatuses(handles) {
 }
 
 async function loadMyStatus() {
+  const currentHandle = getCurrentHandle()
   if (!currentHandle) return
   try {
     const { data } = await sb.from('players').select('status').eq('handle', currentHandle).single()
@@ -93,6 +94,7 @@ function updateStatusToggleUI() {
 }
 
 export async function toggleInVerseStatus() {
+  const currentHandle = getCurrentHandle()
   if (!currentHandle) { showToast('// LOGIN REQUIRED'); return }
   const newStatus = myStatus === 'in-verse' ? 'offline' : 'in-verse'
   try {
@@ -149,6 +151,7 @@ function expiryClass(expires_at) {
 // ── Card render ───────────────────────────────────────────────────────────────
 function renderCard(l, isMine) {
   const applied = l.applied
+  const currentHandle = getCurrentHandle()
   isMine = isMine || (currentHandle && l.owner && l.owner.toUpperCase() === currentHandle.toUpperCase())
   const isOrg = l.post_type === 'org'
   const isSoloLfg = l.post_type === 'lfg'
@@ -202,7 +205,7 @@ function renderCard(l, isMine) {
       <div class="card-owner">
         <div class="owner-avatar" style="border-color:${isSoloLfg?'rgba(79,232,168,0.4)':'rgba(176,143,232,0.4)'};background:${isSoloLfg?'rgba(79,232,168,0.1)':'rgba(176,143,232,0.1)'};color:${isSoloLfg?'var(--success)':'#b08fe8'}">${l.owner.slice(0,2)}</div>
         <div class="owner-info">
-          <div class="owner-handle"><span class="card-status-dot ${statusClass}"></span>${l.owner}${l.org?` <span style="font-size:9px;color:var(--accent2);letter-spacing:1px;border:1px solid rgba(232,168,79,0.3);padding:1px 5px;margin-left:4px">${l.org}</span>`:''}</div>
+          <div class="owner-handle"><span class="card-status-dot ${statusClass}"></span><span onclick="openProfile('${l.owner}')" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px">${l.owner}</span>${l.org?` <span style="font-size:9px;color:var(--accent2);letter-spacing:1px;border:1px solid rgba(232,168,79,0.3);padding:1px 5px;margin-left:4px">${l.org}</span>`:''}</div>
           <div class="owner-meta">${timezoneLabel(l.timezone||'')} · ${l.playstyle||''}</div>
         </div>
       </div>
@@ -298,6 +301,7 @@ export async function renderMyPosts() {
   const count = document.getElementById('my-post-count')
   if (!grid) return
   grid.innerHTML = '<div style="padding:40px;text-align:center;font-family:monospace;color:#5a7a9a;letter-spacing:1px">[ LOADING... ]</div>'
+  const currentHandle = getCurrentHandle()
   if (!currentHandle) {
     grid.innerHTML = ''
     if (empty) empty.style.display = 'block'
@@ -451,6 +455,7 @@ export async function submitApply(id) {
   const applicant_discord = document.getElementById('apply-discord')?.value?.trim() || ''
   const btn = document.getElementById('btn-transmit')
   if (btn) { btn.textContent = 'TRANSMITTING...'; btn.disabled = true }
+  const currentHandle = getCurrentHandle()
   try {
     await fetch('https://sfozlgthgvphkntxbhgn.supabase.co/functions/v1/notify-discord', {
       method: 'POST',

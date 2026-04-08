@@ -11,7 +11,8 @@ export function showToast(msg) {
 export function setTabById(id, btn) {
   document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'))
   if (btn) btn.classList.add('active')
-  document.querySelectorAll('[id^="tab-"]').forEach(el => el.style.display = 'none')
+  document.getElementById('tab-browse').style.display = 'none'
+  document.getElementById('tab-my-posts').style.display = 'none'
   const tab = document.getElementById('tab-' + id)
   if (tab) tab.style.display = 'block'
 }

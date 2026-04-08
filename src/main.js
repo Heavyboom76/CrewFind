@@ -16,7 +16,7 @@ window.registerWithEmail = registerWithEmail
 window.loginWithEmail = loginWithEmail
 
 // Import and expose listing/post functions
-import { filterBy, onSearchInput, clearSearch, openApply, closeApplyModal, submitApply, deleteListing, bumpListing } from './js/listings.js'
+import { filterBy, onSearchInput, clearSearch, openApply, closeApplyModal, submitApply, deleteListing, bumpListing, renderMyPosts } from './js/listings.js'
 window.filterBy = filterBy
 window.onSearchInput = onSearchInput
 window.clearSearch = clearSearch
@@ -36,9 +36,21 @@ window.setPostType = setPostType
 
 import { selectShip } from './js/ships.js'
 import { toggleInVerseStatus, changeHandle } from './js/listings.js'
+import { openProfile, closeProfile, submitRating, saveProfileField, triggerAvatarUpload, uploadAvatar, toggleAddShip, addShipToHangar, removeShipFromHangar, copyToClipboard } from './js/profile.js'
 window.selectShip = selectShip
 window.toggleInVerseStatus = toggleInVerseStatus
 window.changeHandle = changeHandle
+window.openProfile = openProfile
+window.closeProfile = closeProfile
+window.submitRating = submitRating
+window.saveProfileField = saveProfileField
+window.triggerAvatarUpload = triggerAvatarUpload
+window.uploadAvatar = uploadAvatar
+window.toggleAddShip = toggleAddShip
+window.addShipToHangar = addShipToHangar
+window.removeShipFromHangar = removeShipFromHangar
+window.copyToClipboard = copyToClipboard
+window.openOwnProfile = () => { import('./js/auth.js').then(m => openProfile(m.getCurrentHandle())) }
 
 // PWA service worker
 if ('serviceWorker' in navigator) {
@@ -66,4 +78,22 @@ if ('serviceWorker' in navigator) {
 initShipSearch()
 await initAuth()
 await renderListings()
+
+// Tab handlers — set up after everything is loaded
+document.getElementById('tab-btn-browse')?.addEventListener('click', async function() {
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'))
+  this.classList.add('active')
+  document.getElementById('tab-browse').style.display = 'block'
+  document.getElementById('tab-my-posts').style.display = 'none'
+  await renderListings()
+})
+
+document.getElementById('tab-btn-my-posts')?.addEventListener('click', async function() {
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'))
+  this.classList.add('active')
+  document.getElementById('tab-browse').style.display = 'none'
+  document.getElementById('tab-my-posts').style.display = 'block'
+  await renderMyPosts()
+})
+
 document.dispatchEvent(new Event('crewfind:ready'))
