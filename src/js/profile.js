@@ -201,6 +201,19 @@ export async function openProfile(handle) {
             </div>`).join('')}
         </div>
       </div>` : ''}
+
+      <!-- Danger zone — own profile only -->
+      ${isOwnProfile ? `
+      <div style="margin-top:28px;padding-top:20px;border-top:1px solid var(--border)">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--danger);text-transform:uppercase;margin-bottom:10px">// Danger Zone</div>
+        <button onclick="deleteAccount()" style="width:100%;padding:10px;background:transparent;border:1px solid var(--danger);color:var(--danger);font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all 0.15s"
+          onmouseover="this.style.background='rgba(232,79,79,0.1)'" onmouseout="this.style.background='transparent'">
+          DELETE ACCOUNT
+        </button>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-dim);letter-spacing:0.5px;margin-top:6px;text-align:center">
+          Permanently removes your profile, listings and hangar
+        </div>
+      </div>` : ''}
     `
 
     // Init hangar ship search if own profile

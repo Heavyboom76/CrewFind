@@ -282,6 +282,57 @@ export async function signOut() {
   showOnboarding('login')
 }
 
+export async function deleteAccount() {
+  if (!currentUser) { showToast('// ERROR: NOT LOGGED IN'); return }
+
+  const first = confirm('Are you sure you want to delete your account? This will remove your profile, listings, hangar and ratings permanently.')
+  if (!first) return
+  const second = confirm('This cannot be undone. Delete account?')
+  if (!second) return
+
+  const userId = currentUser.id
+  const handle = currentHandle
+
+  try {
+    showToast('// DELETING ACCOUNT...')
+
+    // Get current session token to pass to edge function
+    const { data: { session } } = await sb.auth.getSession()
+
+    // Delete all user data in order (foreign key safe)
+    await sb.from('hangars').delete().eq('user_id', userId)
+    await sb.from('ratings').delete().eq('rater_id', userId)
+    await sb.from('ratings').delete().eq('rated_id', userId)
+    await sb.from('listings').delete().eq('owner', handle)
+    await sb.from('profiles').delete().eq('id', userId)
+
+    // Call edge function to fully delete the auth.users row
+    // This uses the service role key server-side so the user can re-register clean
+    if (session) {
+      await fetch('https://sfozlgthgvphkntxbhgn.supabase.co/functions/v1/delete-user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      })
+    }
+
+    // Sign out and clear everything locally
+    await sb.auth.signOut()
+    currentUser = null
+    currentHandle = ''
+    currentProfile = null
+    localStorage.clear()
+    updateNavHandle('---')
+    showOnboarding('login')
+    showToast('// ACCOUNT DELETED')
+  } catch (e) {
+    console.error('Delete account error:', e)
+    showToast('// ERROR: Could not delete account — ' + (e.message || 'try again'))
+  }
+}
+
 // ── RSI Handle (guest) ────────────────────────────────────────────────────────
 export function saveHandle() {
   const h = document.getElementById('onboard-handle')?.value?.trim()
