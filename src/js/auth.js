@@ -75,8 +75,58 @@ async function handleSession(session) {
     updateNavHandle(currentHandle)
     hideOnboarding()
   } else {
-    // New user — need to complete profile
-    showOnboarding('register')
+    // No profile yet — check if this is a Discord user and auto-create their profile
+    const isDiscord = currentUser.app_metadata?.provider === 'discord'
+    if (isDiscord) {
+      // Pull handle from Discord metadata, fall back to username
+      const discordName = currentUser.user_metadata?.custom_claims?.global_name
+        || currentUser.user_metadata?.full_name
+        || currentUser.user_metadata?.name
+        || currentUser.email?.split('@')[0]
+        || 'PILOT'
+      const handle = discordName.toUpperCase().replace(/\s+/g, '_')
+
+      // Check if handle is already taken by another user
+      const { data: existing } = await sb
+        .from('profiles')
+        .select('id')
+        .eq('rsi_handle', handle)
+        .maybeSingle()
+
+      const finalHandle = existing ? handle + '_' + currentUser.id.slice(0, 4).toUpperCase() : handle
+
+      try {
+        await sb.from('profiles').insert({
+          id: currentUser.id,
+          rsi_handle: finalHandle,
+          display_name: finalHandle,
+          email: currentUser.email || null,
+          created_at: new Date().toISOString()
+        })
+        currentProfile = { rsi_handle: finalHandle, display_name: finalHandle }
+        currentHandle = finalHandle
+        localStorage.setItem('rsi_handle', finalHandle)
+        updateNavHandle(finalHandle)
+        hideOnboarding()
+        showToast('// WELCOME TO CREWFIND, ' + finalHandle)
+      } catch (e) {
+        console.error('Auto profile create error:', e)
+        // Profile might have been created in a race — try loading again
+        const { data: retry } = await sb.from('profiles').select('*').eq('id', currentUser.id).maybeSingle()
+        if (retry) {
+          currentProfile = retry
+          currentHandle = retry.rsi_handle || retry.display_name || 'PILOT'
+          localStorage.setItem('rsi_handle', currentHandle)
+          updateNavHandle(currentHandle)
+          hideOnboarding()
+        } else {
+          showOnboarding('register')
+        }
+      }
+    } else {
+      // Email user with no profile — send to register to pick a handle
+      showOnboarding('register')
+    }
   }
 }
 

@@ -27,12 +27,26 @@ export async function openProfile(handle) {
   }, 8000)
 
   try {
-    // Load profile
-    const { data: profile } = await sb
+    // Load profile — try by handle first, fall back to auth user id if it's own profile
+    let { data: profile } = await sb
       .from('profiles')
       .select('*')
       .eq('rsi_handle', handle)
       .maybeSingle()
+
+    // Fallback: if no profile found and this looks like the current user, try by id
+    if (!profile) {
+      const { getCurrentUser } = await import('./auth.js')
+      const user = getCurrentUser()
+      if (user) {
+        const { data: profileById } = await sb
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .maybeSingle()
+        if (profileById) profile = profileById
+      }
+    }
 
     if (!profile) {
       clearTimeout(loadTimeout)
