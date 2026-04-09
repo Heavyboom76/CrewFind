@@ -39,6 +39,7 @@ window.setPostType = setPostType
 
 import { selectShip } from './js/ships.js'
 import { toggleInVerseStatus, changeHandle } from './js/listings.js'
+import { initMessages, renderInbox, openChat, startConversation, sendMessage, clearConversation, blockUser } from './js/messages.js'
 import { openProfile, closeProfile, submitRating, saveProfileField, triggerAvatarUpload, uploadAvatar, toggleAddShip, addShipToHangar, removeShipFromHangar, copyToClipboard } from './js/profile.js'
 window.selectShip = selectShip
 window.toggleInVerseStatus = toggleInVerseStatus
@@ -54,6 +55,11 @@ window.addShipToHangar = addShipToHangar
 window.removeShipFromHangar = removeShipFromHangar
 window.copyToClipboard = copyToClipboard
 window.openOwnProfile = () => { import('./js/auth.js').then(m => openProfile(m.getCurrentHandle())) }
+window.startConversation = startConversation
+window.openChat = openChat
+window.renderInbox = renderInbox
+window.clearConversation = clearConversation
+window.blockUser = blockUser
 
 // PWA service worker
 if ('serviceWorker' in navigator) {
@@ -80,6 +86,7 @@ if ('serviceWorker' in navigator) {
 // Init
 initShipSearch()
 await initAuth()
+await initMessages()
 await renderListings()
 
 // Tab handlers — set up after everything is loaded
@@ -100,3 +107,5 @@ document.getElementById('tab-btn-my-posts')?.addEventListener('click', async fun
 })
 
 document.dispatchEvent(new Event('crewfind:ready'))
+
+// ── Messages module ───────────────────────────────────────────────────────────

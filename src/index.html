@@ -306,6 +306,7 @@
     <div class="nav-bottom">
       <button class="nav-tab active" id="tab-btn-browse" onclick="setTabById('browse', this)">Browse</button>
       <button class="nav-tab" id="tab-btn-my-posts" onclick="setTabById('my-posts', this)">My Posts</button>
+      <button class="nav-tab" id="tab-btn-messages" onclick="openMessagesTab()">Messages<span id="messages-badge" style="display:none;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:var(--danger);color:#fff;font-size:8px;font-weight:700;margin-left:4px;font-family:Share Tech Mono,monospace">0</span></button>
       <button class="nav-tab" id="tab-btn-profile" onclick="openOwnProfile()">My Profile</button>
       <div class="pilot-badge" onclick="changeHandle()">
         <div class="pilot-dot"></div>
@@ -355,6 +356,9 @@
       <div class="listings" id="listings-grid"></div>
       <div class="empty" id="empty-state">[ NO MATCHING CREW LISTINGS ]</div>
     </div>
+
+    <!-- MESSAGES TAB -->
+    <div id="tab-messages" style="display:none"></div>
 
     <!-- MY POSTS TAB -->
     <div id="tab-my-posts" style="display:none">
@@ -462,7 +466,7 @@
    'submitPost','adjustRole','previewOrgPoster','setPostType','selectShip','toggleInVerseStatus',
    'changeHandle','copyDiscord','openProfile','closeProfile','openOwnProfile','submitRating',
    'saveProfileField','triggerAvatarUpload','uploadAvatar','toggleAddShip','addShipToHangar',
-   'removeShipFromHangar','copyToClipboard','setRating','selectHangarShip'].forEach(fn => {
+   'removeShipFromHangar','copyToClipboard','setRating','selectHangarShip','openMessagesTab','startConversation','openChat','renderInbox','clearConversation','blockUser'].forEach(fn => {
     window[fn] = window[fn] || function(...args) {
       document.addEventListener('crewfind:ready', () => window[fn](...args), { once: true })
     }
