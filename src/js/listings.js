@@ -7,6 +7,7 @@ export let myPosts = []
 let activeFilter = 'all'
 let searchQuery = ''
 let playerStatuses = {}
+let avatarCache = {}
 let myStatus = 'offline'
 let applyTarget = null
 let appliedIds = new Set(JSON.parse(localStorage.getItem('appliedIds') || '[]'))
@@ -68,6 +69,11 @@ async function loadPlayerStatuses(handles) {
     const { data } = await sb.from('players').select('handle, status').in('handle', handles)
     if (data) data.forEach(p => { playerStatuses[p.handle.toUpperCase()] = p.status })
   } catch (e) { console.error('Status load error:', e) }
+  // Load avatars for all listing owners in the same pass
+  try {
+    const { data } = await sb.from('profiles').select('rsi_handle, avatar_url').in('rsi_handle', handles)
+    if (data) data.forEach(p => { if (p.avatar_url) avatarCache[p.rsi_handle.toUpperCase()] = p.avatar_url })
+  } catch (e) { console.error('Avatar load error:', e) }
 }
 
 async function loadMyStatus() {
@@ -148,6 +154,16 @@ function expiryClass(expires_at) {
   return (new Date(expires_at) - new Date()) < 6 * 3600000 ? 'expiry-soon' : 'expiry-ok'
 }
 
+// ── Avatar helper ─────────────────────────────────────────────────────────────
+function avatarHtml(handle, style = '') {
+  const url = avatarCache[handle?.toUpperCase()]
+  const initials = (handle || '??').slice(0, 2).toUpperCase()
+  if (url) {
+    return `<img src="${url}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:1px solid var(--border-bright);flex-shrink:0;${style}" onerror="this.outerHTML='<div class=\'owner-avatar\' style=\'${style}\'>${initials}</div>'" />`
+  }
+  return `<div class="owner-avatar" style="${style}">${initials}</div>`
+}
+
 // ── Card render ───────────────────────────────────────────────────────────────
 function renderCard(l, isMine) {
   const applied = l.applied
@@ -171,7 +187,7 @@ function renderCard(l, isMine) {
           <span class="org-badge">🏴 ORG RECRUITING</span>
         </div>
         <div class="card-owner" style="margin-bottom:10px;padding-bottom:10px">
-          <div class="owner-avatar" style="border-color:rgba(232,168,79,0.4);background:rgba(232,168,79,0.1);color:var(--accent2)">${l.owner.slice(0,2)}</div>
+          <div class="owner-avatar" style="border-color:rgba(232,168,79,0.4);background:rgba(232,168,79,0.1);color:var(--accent2)">${avatarCache[l.owner?.toUpperCase()] ? `<img src="${avatarCache[l.owner.toUpperCase()]}" style="width:28px;height:28px;border-radius:50%;object-fit:cover" />` : l.owner.slice(0,2)}</div>
           <div class="owner-info">
             <div class="owner-handle"><span class="card-status-dot ${statusClass}"></span>${l.owner}</div>
             <div class="owner-meta">${timezoneLabel(l.timezone||'')} · ${l.playstyle||''}</div>
@@ -203,7 +219,7 @@ function renderCard(l, isMine) {
         <span class="solo-badge ${badgeClass}">${badgeText}</span>
       </div>
       <div class="card-owner">
-        <div class="owner-avatar" style="border-color:${isSoloLfg?'rgba(79,232,168,0.4)':'rgba(176,143,232,0.4)'};background:${isSoloLfg?'rgba(79,232,168,0.1)':'rgba(176,143,232,0.1)'};color:${isSoloLfg?'var(--success)':'#b08fe8'}">${l.owner.slice(0,2)}</div>
+        <div class="owner-avatar" style="border-color:${isSoloLfg?'rgba(79,232,168,0.4)':'rgba(176,143,232,0.4)'};background:${isSoloLfg?'rgba(79,232,168,0.1)':'rgba(176,143,232,0.1)'};color:${isSoloLfg?'var(--success)':'#b08fe8'};overflow:hidden">${avatarCache[l.owner?.toUpperCase()] ? `<img src="${avatarCache[l.owner.toUpperCase()]}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" />` : l.owner.slice(0,2)}</div>
         <div class="owner-info">
           <div class="owner-handle"><span class="card-status-dot ${statusClass}"></span><span onclick="openProfile('${l.owner}')" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px">${l.owner}</span>${l.org?` <span style="font-size:9px;color:var(--accent2);letter-spacing:1px;border:1px solid rgba(232,168,79,0.3);padding:1px 5px;margin-left:4px">${l.org}</span>`:''}</div>
           <div class="owner-meta">${timezoneLabel(l.timezone||'')} · ${l.playstyle||''}</div>
@@ -232,7 +248,7 @@ function renderCard(l, isMine) {
       <div class="mission-type ${missionColor(l.mission)}">${missionLabel(l.mission)}</div>
     </div>
     <div class="card-owner">
-      <div class="owner-avatar">${l.owner.slice(0,2)}</div>
+      <div class="owner-avatar" style="overflow:hidden">${avatarCache[l.owner?.toUpperCase()] ? `<img src="${avatarCache[l.owner.toUpperCase()]}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" />` : l.owner.slice(0,2)}</div>
       <div class="owner-info">
         <div class="owner-handle"><span class="card-status-dot ${statusClass}"></span>${l.owner}${l.org?` <span style="font-size:9px;color:var(--accent2);letter-spacing:1px;border:1px solid rgba(232,168,79,0.3);padding:1px 5px;margin-left:4px">${l.org}</span>`:''}</div>
         <div class="owner-meta">${timezoneLabel(l.timezone||l.tz||'')} · ${l.playstyle||l.style||''}</div>
