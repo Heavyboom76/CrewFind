@@ -104,6 +104,11 @@ export async function openProfile(handle) {
             ${profile.twitch ? `<a href="javascript:void(0)" onclick="openExternalUrl('https://twitch.tv/${profile.twitch.replace(/^@/, '')}')" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#9146ff;border:1px solid #9146ff;padding:2px 8px;text-decoration:none;letter-spacing:1px">⊹ TWITCH</a>` : ''}
             ${profile.youtube ? `<a href="javascript:void(0)" onclick="openExternalUrl('https://youtube.com/@${profile.youtube.replace(/^@/, '')}')" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#ff0000;border:1px solid #ff0000;padding:2px 8px;text-decoration:none;letter-spacing:1px">⊹ YOUTUBE</a>` : ''}
           </div>
+          ${!isOwnProfile ? `
+          <button onclick="startConversation('${handle}')" style="margin-top:10px;padding:7px 16px;background:transparent;border:1px solid var(--accent);color:var(--accent);font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;width:100%;transition:all 0.15s"
+            onmouseover="this.style.background='rgba(79,168,232,0.1)'" onmouseout="this.style.background='transparent'">
+            ✉ MESSAGE PILOT
+          </button>` : ''}
         </div>
       </div>
 

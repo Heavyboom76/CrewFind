@@ -39,7 +39,7 @@ window.setPostType = setPostType
 
 import { selectShip } from './js/ships.js'
 import { toggleInVerseStatus, changeHandle } from './js/listings.js'
-import { initMessages, renderInbox, openChat, startConversation, sendMessage, clearConversation, blockUser } from './js/messages.js'
+import { initMessages, renderInbox, openChat, startConversation, sendMessage, clearConversation, blockUser, openMessagesTab } from './js/messages.js'
 import { openProfile, closeProfile, submitRating, saveProfileField, triggerAvatarUpload, uploadAvatar, toggleAddShip, addShipToHangar, removeShipFromHangar, copyToClipboard } from './js/profile.js'
 window.selectShip = selectShip
 window.toggleInVerseStatus = toggleInVerseStatus
@@ -56,6 +56,7 @@ window.removeShipFromHangar = removeShipFromHangar
 window.copyToClipboard = copyToClipboard
 window.openOwnProfile = () => { import('./js/auth.js').then(m => openProfile(m.getCurrentHandle())) }
 window.startConversation = startConversation
+window.openMessagesTab = openMessagesTab
 window.openChat = openChat
 window.renderInbox = renderInbox
 window.clearConversation = clearConversation

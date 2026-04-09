@@ -267,7 +267,10 @@ function renderCard(l, isMine) {
             <button class="btn-apply" style="border-color:var(--accent);color:var(--accent)" onclick="bumpListing('${l.id}')"><span>BUMP</span></button>
             <button class="btn-apply" style="border-color:var(--danger);color:var(--danger)" onclick="deleteListing('${l.id}')"><span>DELETE</span></button>
            </div>`
-        : `<button class="btn-apply ${applied?'applied':''}" onclick="openApply('${l.id}')"><span>${applied?'✓ APPLIED':'APPLY'}</span></button>`
+        : `<div style="display:flex;gap:6px">
+            <button class="btn-apply ${applied?'applied':''}" onclick="openApply('${l.id}')"><span>${applied?'✓ APPLIED':'APPLY'}</span></button>
+            <button class="btn-apply" onclick="startConversation('${l.owner}')" style="border-color:var(--text-dim);color:var(--text-dim)" title="Message pilot"><span>MSG</span></button>
+           </div>`
       }
     </div>
   </div>`
