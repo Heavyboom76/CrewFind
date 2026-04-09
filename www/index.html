@@ -179,8 +179,8 @@
   .divider { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--text-dim); letter-spacing: 1px; text-align: center; margin-bottom: 16px; }
   .btn-ghost { width: 100%; padding: 12px; background: transparent; border: 1px solid var(--border-bright); color: var(--accent); font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; }
 </style>
-  <script type="module" crossorigin src="/assets/index-Dhq53Nv-.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/auth-DKa7Vr_R.js">
+  <script type="module" crossorigin src="/assets/index-xQnjMNAJ.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/auth-C0UXr8bR.js">
 </head>
 <body>
 <div class="scanlines"></div>
@@ -227,8 +227,9 @@
         <input class="form-input" id="login-password" type="password" placeholder="••••••••" />
       </div>
       <button class="btn-post" id="btn-login" onclick="loginWithEmail()">LOGIN</button>
-      <div style="text-align:center;margin-top:12px">
+      <div style="text-align:center;margin-top:12px;display:flex;justify-content:space-between">
         <a href="javascript:void(0)" onclick="setOnboardView('register')" style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:1px;">No account? Register →</a>
+        <a href="javascript:void(0)" onclick="setOnboardView('reset')" style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-dim);letter-spacing:1px;">Forgot password?</a>
       </div>
     </div>
 
@@ -263,6 +264,38 @@
       </div>
       <button class="btn-ghost" onclick="saveHandle()">ENTER THE VERSE</button>
     </div>
+
+    <!-- FORGOT PASSWORD VIEW -->
+    <div id="onboard-reset-view" style="display:none">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-dim);letter-spacing:1px;margin-bottom:16px;padding:10px;border:1px solid var(--border)">
+        Enter your email and we'll send you a reset link.
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input class="form-input" id="reset-email" type="email" placeholder="your@email.com" />
+      </div>
+      <button class="btn-post" id="btn-reset" onclick="resetPassword()">SEND RESET LINK</button>
+      <div style="text-align:center;margin-top:12px">
+        <a href="javascript:void(0)" onclick="setOnboardView('login')" style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-dim);letter-spacing:1px;">← Back to login</a>
+      </div>
+    </div>
+
+    <!-- SET NEW PASSWORD VIEW (after clicking reset link in email) -->
+    <div id="onboard-newpass-view" style="display:none">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-dim);letter-spacing:1px;margin-bottom:16px;padding:10px;border:1px solid var(--border)">
+        Choose a new password for your account.
+      </div>
+      <div class="form-group">
+        <label class="form-label">New Password <span style="color:var(--text-dim);font-size:9px">(min 6 chars)</span></label>
+        <input class="form-input" id="newpass-password" type="password" placeholder="••••••••" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Confirm Password</label>
+        <input class="form-input" id="newpass-confirm" type="password" placeholder="••••••••" />
+      </div>
+      <button class="btn-post" id="btn-set-password" onclick="setNewPassword()">SET NEW PASSWORD</button>
+    </div>
+
   </div>
 </div>
 

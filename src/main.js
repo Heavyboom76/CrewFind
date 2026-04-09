@@ -3,7 +3,7 @@ import { initListings, renderListings } from './js/listings.js'
 import { initPost } from './js/post.js'
 import { initShipSearch } from './js/ships.js'
 import { setTabById, openExternalUrl } from './js/ui.js'
-import { registerWithEmail, loginWithEmail, signInWithDiscord, signOut, saveHandle, setOnboardView } from './js/auth.js'
+import { registerWithEmail, loginWithEmail, signInWithDiscord, signOut, saveHandle, setOnboardView, resetPassword, setNewPassword } from './js/auth.js'
 
 // Make functions available globally for inline HTML handlers
 window.setTabById = setTabById
@@ -14,6 +14,8 @@ window.saveHandle = saveHandle
 window.setOnboardView = setOnboardView
 window.registerWithEmail = registerWithEmail
 window.loginWithEmail = loginWithEmail
+window.resetPassword = resetPassword
+window.setNewPassword = setNewPassword
 
 // Import and expose listing/post functions
 import { filterBy, onSearchInput, clearSearch, openApply, closeApplyModal, submitApply, deleteListing, bumpListing, renderMyPosts } from './js/listings.js'

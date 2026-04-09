@@ -3,15 +3,28 @@ import { showToast } from './ui.js'
 import { getCurrentUser, getCurrentHandle } from './auth.js'
 import { SHIPS } from './ships.js'
 
+// Track which profile is currently open
+let currentProfileHandle = ''
+
 // ── Open profile modal ────────────────────────────────────────────────────────
 export async function openProfile(handle) {
+  if (!handle) return
   const modal = document.getElementById('profile-modal')
   const body = document.getElementById('profile-modal-body')
   if (!modal || !body) return
 
+  currentProfileHandle = handle
+
   body.innerHTML = '<div style="padding:40px;text-align:center;font-family:monospace;color:#5a7a9a;letter-spacing:1px">[ LOADING PILOT DATA... ]</div>'
   modal.classList.add('open')
   document.body.style.overflow = 'hidden'
+
+  // Safety timeout — if load takes >8s, show error instead of hanging forever
+  const loadTimeout = setTimeout(() => {
+    if (body.innerHTML.includes('LOADING PILOT DATA')) {
+      body.innerHTML = '<div style="padding:40px;text-align:center;font-family:monospace;color:#e84f4f">[ LOAD TIMEOUT — CHECK CONNECTION ]</div>'
+    }
+  }, 8000)
 
   try {
     // Load profile
@@ -22,16 +35,19 @@ export async function openProfile(handle) {
       .maybeSingle()
 
     if (!profile) {
+      clearTimeout(loadTimeout)
       body.innerHTML = '<div style="padding:40px;text-align:center;font-family:monospace;color:#e84f4f">[ PILOT NOT FOUND ]</div>'
       return
     }
 
-    // Load hangar, ratings, listings in parallel
+    // Load hangar, ratings, listings in parallel — each wrapped so one failure doesn't kill all
     const [hangarRes, ratingsRes, listingsRes] = await Promise.all([
-      sb.from('hangars').select('*').eq('user_id', profile.id).order('ship_name'),
-      sb.from('ratings').select('*').eq('rated_id', profile.id).order('created_at', { ascending: false }),
-      sb.from('listings').select('*').eq('owner', handle).order('created_at', { ascending: false })
+      sb.from('hangars').select('*').eq('user_id', profile.id).order('ship_name').then(r => r).catch(() => ({ data: [] })),
+      sb.from('ratings').select('*').eq('rated_id', profile.id).order('created_at', { ascending: false }).then(r => r).catch(() => ({ data: [] })),
+      sb.from('listings').select('*').eq('owner', handle).order('created_at', { ascending: false }).then(r => r).catch(() => ({ data: [] }))
     ])
+
+    clearTimeout(loadTimeout)
 
     const hangar = hangarRes.data || []
     const ratings = ratingsRes.data || []
@@ -179,6 +195,7 @@ export async function openProfile(handle) {
     }
 
   } catch (e) {
+    clearTimeout(loadTimeout)
     console.error('Profile load error:', e)
     body.innerHTML = '<div style="padding:40px;text-align:center;font-family:monospace;color:#e84f4f">[ ERROR LOADING PROFILE ]</div>'
   }
@@ -317,9 +334,7 @@ export async function addShipToHangar() {
     document.getElementById('hangar-ship-search').value = ''
     document.getElementById('hangar-ship-value').value = ''
     document.getElementById('add-ship-form').style.display = 'none'
-    // Reload profile to show new ship
-    const handle = document.querySelector('#profile-modal .modal-title')?.textContent?.replace('// ', '')
-    if (handle) openProfile(handle)
+    if (currentProfileHandle) openProfile(currentProfileHandle)
   } catch (e) { 
     console.error('Add ship error:', e)
     showToast('// ERROR: Could not add ship') 
@@ -333,8 +348,7 @@ export async function removeShipFromHangar(id) {
   try {
     await sb.from('hangars').delete().eq('id', id)
     showToast('// SHIP REMOVED')
-    const handle = document.getElementById('profile-modal-handle')?.textContent
-    if (handle) openProfile(handle)
+    if (currentProfileHandle) openProfile(currentProfileHandle)
   } catch (e) { showToast('// ERROR: Could not remove ship') }
 }
 window.removeShipFromHangar = removeShipFromHangar

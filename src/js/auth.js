@@ -17,6 +17,16 @@ export function getCurrentProfile() { return currentProfile }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 export async function initAuth() {
+  // Check if we're returning from a password reset email link
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('reset') === 'true') {
+    // Supabase sets the session automatically from the URL hash
+    // Just show the set-new-password view
+    document.getElementById('onboarding').style.display = 'flex'
+    setOnboardView('newpass')
+    return
+  }
+
   try {
     const { data: { session } } = await sb.auth.getSession()
     if (session?.user) {
@@ -154,6 +164,53 @@ export async function loginWithEmail() {
   }
 }
 
+// ── Password Reset ────────────────────────────────────────────────────────────
+export async function resetPassword() {
+  const email = document.getElementById('reset-email')?.value?.trim()
+  if (!email) { showToast('// ERROR: Enter your email address'); return }
+
+  const btn = document.getElementById('btn-reset')
+  if (btn) { btn.textContent = 'SENDING...'; btn.disabled = true }
+
+  try {
+    const { error } = await sb.auth.resetPasswordForEmail(email, {
+      redirectTo: 'https://sc-crewfind.com?reset=true'
+    })
+    if (error) throw error
+    showToast('// RESET LINK SENT — CHECK YOUR EMAIL')
+    // Switch back to login view after a moment
+    setTimeout(() => setOnboardView('login'), 2000)
+  } catch (e) {
+    showToast('// ERROR: ' + (e.message || 'Could not send reset email'))
+  } finally {
+    if (btn) { btn.textContent = 'SEND RESET LINK'; btn.disabled = false }
+  }
+}
+
+export async function setNewPassword() {
+  const password = document.getElementById('newpass-password')?.value
+  const confirm = document.getElementById('newpass-confirm')?.value
+  if (!password || !confirm) { showToast('// ERROR: Fill in both fields'); return }
+  if (password !== confirm) { showToast('// ERROR: Passwords do not match'); return }
+  if (password.length < 6) { showToast('// ERROR: Password must be 6+ characters'); return }
+
+  const btn = document.getElementById('btn-set-password')
+  if (btn) { btn.textContent = 'UPDATING...'; btn.disabled = true }
+
+  try {
+    const { error } = await sb.auth.updateUser({ password })
+    if (error) throw error
+    showToast('// PASSWORD UPDATED — YOU ARE NOW LOGGED IN')
+    hideOnboarding()
+    // Clean up the URL
+    window.history.replaceState({}, '', '/')
+  } catch (e) {
+    showToast('// ERROR: ' + (e.message || 'Could not update password'))
+  } finally {
+    if (btn) { btn.textContent = 'SET NEW PASSWORD'; btn.disabled = false }
+  }
+}
+
 export async function signInWithDiscord() {
   const { error } = await sb.auth.signInWithOAuth({
     provider: 'discord',
@@ -205,11 +262,15 @@ export function setOnboardView(view) {
   const loginView = document.getElementById('onboard-login-view')
   const registerView = document.getElementById('onboard-register-view')
   const guestView = document.getElementById('onboard-guest-view')
+  const resetView = document.getElementById('onboard-reset-view')
+  const newpassView = document.getElementById('onboard-newpass-view')
   if (loginView) loginView.style.display = view === 'login' ? 'block' : 'none'
   if (registerView) registerView.style.display = view === 'register' ? 'block' : 'none'
   if (guestView) guestView.style.display = view === 'guest' ? 'block' : 'none'
+  if (resetView) resetView.style.display = view === 'reset' ? 'block' : 'none'
+  if (newpassView) newpassView.style.display = view === 'newpass' ? 'block' : 'none'
 
-  // Update tab button highlights
+  // Update tab button highlights (tabs only exist for login/register/guest)
   document.querySelectorAll('.auth-tab-btn').forEach(btn => btn.classList.remove('active'))
   const activeBtn = document.querySelector(`.auth-tab-btn[onclick*="'${view}'"]`)
   if (activeBtn) activeBtn.classList.add('active')
