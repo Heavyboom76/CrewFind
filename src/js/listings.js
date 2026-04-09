@@ -374,7 +374,7 @@ export function initListings() {
 // ── Actions ───────────────────────────────────────────────────────────────────
 export async function bumpListing(id) {
   try {
-    const newExpiry = new Date(Date.now() + 48*60*60*1000).toISOString()
+    const newExpiry = new Date(Date.now() + 7*24*60*60*1000).toISOString()
     const { error } = await sb.from('listings').update({ expires_at: newExpiry }).eq('id', id)
     if (error) throw error
     const l = listings.find(x => String(x.id) === String(id))
