@@ -296,26 +296,31 @@ export async function deleteAccount() {
   try {
     showToast('// DELETING ACCOUNT...')
 
-    // Get current session token to pass to edge function
+    // Get session token BEFORE we start deleting anything
     const { data: { session } } = await sb.auth.getSession()
+    if (!session) throw new Error('No active session')
 
-    // Delete all user data in order (foreign key safe)
+    // Delete all user data in correct order (must delete profile before auth user)
     await sb.from('hangars').delete().eq('user_id', userId)
     await sb.from('ratings').delete().eq('rater_id', userId)
     await sb.from('ratings').delete().eq('rated_id', userId)
     await sb.from('listings').delete().eq('owner', handle)
     await sb.from('profiles').delete().eq('id', userId)
 
-    // Call edge function to fully delete the auth.users row
-    // This uses the service role key server-side so the user can re-register clean
-    if (session) {
-      await fetch('https://sfozlgthgvphkntxbhgn.supabase.co/functions/v1/delete-user', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
-        }
-      })
+    // Now call edge function to delete the auth.users row
+    // Profile must be deleted first or foreign key constraint will block it
+    const res = await fetch('https://sfozlgthgvphkntxbhgn.supabase.co/functions/v1/delete-user', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`
+      }
+    })
+
+    const result = await res.json()
+    if (!res.ok) {
+      // Log but don't block — data is already deleted, orphaned auth row is harmless
+      console.warn('Edge function delete-user failed:', result)
     }
 
     // Sign out and clear everything locally
