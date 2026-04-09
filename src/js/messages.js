@@ -48,7 +48,7 @@ function setUnreadBadge(count) {
   const badge = document.getElementById('messages-badge')
   if (!badge) return
   badge.textContent = count > 9 ? '9+' : count
-  badge.style.display = count > 0 ? 'flex' : 'none'
+  badge.style.display = count > 0 ? 'inline-flex' : 'none'
 }
 
 // ── Realtime subscription ─────────────────────────────────────────────────────
