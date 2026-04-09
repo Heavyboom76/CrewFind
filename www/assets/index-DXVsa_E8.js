@@ -23,8 +23,8 @@ import{A as e,D as t,E as n,F as r,M as i,N as a,O as o,P as s,S as c,T as l,_ a
                </div>`:`<div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-dim);margin-bottom:8px">NO RATINGS YET</div>`}
           <div style="display:flex;gap:8px;flex-wrap:wrap">
             ${t.discord_handle?`<a href="javascript:void(0)" onclick="copyToClipboard('@${t.discord_handle}')" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#5865F2;border:1px solid #5865F2;padding:2px 8px;text-decoration:none;letter-spacing:1px">⊹ DISCORD</a>`:``}
-            ${t.twitch?`<a href="https://twitch.tv/${t.twitch}" target="_blank" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#9146ff;border:1px solid #9146ff;padding:2px 8px;text-decoration:none;letter-spacing:1px">⊹ TWITCH</a>`:``}
-            ${t.youtube?`<a href="https://youtube.com/@${t.youtube}" target="_blank" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#ff0000;border:1px solid #ff0000;padding:2px 8px;text-decoration:none;letter-spacing:1px">⊹ YOUTUBE</a>`:``}
+            ${t.twitch?`<a href="javascript:void(0)" onclick="openExternalUrl('https://twitch.tv/${t.twitch.replace(/^@/,``)}')" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#9146ff;border:1px solid #9146ff;padding:2px 8px;text-decoration:none;letter-spacing:1px">⊹ TWITCH</a>`:``}
+            ${t.youtube?`<a href="javascript:void(0)" onclick="openExternalUrl('https://youtube.com/@${t.youtube.replace(/^@/,``)}')" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#ff0000;border:1px solid #ff0000;padding:2px 8px;text-decoration:none;letter-spacing:1px">⊹ YOUTUBE</a>`:``}
           </div>
         </div>
       </div>

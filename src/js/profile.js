@@ -87,8 +87,8 @@ export async function openProfile(handle) {
           }
           <div style="display:flex;gap:8px;flex-wrap:wrap">
             ${profile.discord_handle ? `<a href="javascript:void(0)" onclick="copyToClipboard('@${profile.discord_handle}')" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#5865F2;border:1px solid #5865F2;padding:2px 8px;text-decoration:none;letter-spacing:1px">⊹ DISCORD</a>` : ''}
-            ${profile.twitch ? `<a href="https://twitch.tv/${profile.twitch}" target="_blank" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#9146ff;border:1px solid #9146ff;padding:2px 8px;text-decoration:none;letter-spacing:1px">⊹ TWITCH</a>` : ''}
-            ${profile.youtube ? `<a href="https://youtube.com/@${profile.youtube}" target="_blank" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#ff0000;border:1px solid #ff0000;padding:2px 8px;text-decoration:none;letter-spacing:1px">⊹ YOUTUBE</a>` : ''}
+            ${profile.twitch ? `<a href="javascript:void(0)" onclick="openExternalUrl('https://twitch.tv/${profile.twitch.replace(/^@/, '')}')" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#9146ff;border:1px solid #9146ff;padding:2px 8px;text-decoration:none;letter-spacing:1px">⊹ TWITCH</a>` : ''}
+            ${profile.youtube ? `<a href="javascript:void(0)" onclick="openExternalUrl('https://youtube.com/@${profile.youtube.replace(/^@/, '')}')" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#ff0000;border:1px solid #ff0000;padding:2px 8px;text-decoration:none;letter-spacing:1px">⊹ YOUTUBE</a>` : ''}
           </div>
         </div>
       </div>
