@@ -244,13 +244,13 @@ function renderCard(l, isMine) {
   return `
   <div class="card" style="animation-delay:${Math.random()*0.2}s">
     <div class="card-header">
-      <div class="ship-name">${l.ship.toUpperCase()}</div>
+      <div class="ship-name">${(l.ship||'UNKNOWN SHIP').toUpperCase()}</div>
       <div class="mission-type ${missionColor(l.mission)}">${missionLabel(l.mission)}</div>
     </div>
     <div class="card-owner">
-      <div class="owner-avatar" style="overflow:hidden">${avatarCache[l.owner?.toUpperCase()] ? `<img src="${avatarCache[l.owner.toUpperCase()]}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" />` : l.owner.slice(0,2)}</div>
+      <div class="owner-avatar" style="overflow:hidden">${avatarCache[l.owner?.toUpperCase()] ? `<img src="${avatarCache[l.owner.toUpperCase()]}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" />` : (l.owner||'??').slice(0,2)}</div>
       <div class="owner-info">
-        <div class="owner-handle"><span class="card-status-dot ${statusClass}"></span>${l.owner}${l.org?` <span style="font-size:9px;color:var(--accent2);letter-spacing:1px;border:1px solid rgba(232,168,79,0.3);padding:1px 5px;margin-left:4px">${l.org}</span>`:''}</div>
+        <div class="owner-handle"><span class="card-status-dot ${statusClass}"></span>${l.owner||'Unknown'}${l.org?` <span style="font-size:9px;color:var(--accent2);letter-spacing:1px;border:1px solid rgba(232,168,79,0.3);padding:1px 5px;margin-left:4px">${l.org}</span>`:''}</div>
         <div class="owner-meta">${timezoneLabel(l.timezone||l.tz||'')} · ${l.playstyle||l.style||''}</div>
       </div>
     </div>
@@ -308,7 +308,10 @@ export async function renderListings() {
     if (empty) empty.style.display = 'block'
   } else {
     if (empty) empty.style.display = 'none'
-    grid.innerHTML = listings.map(l => renderCard(l, false)).join('')
+    grid.innerHTML = listings.map(l => {
+      try { return renderCard(l, false) }
+      catch(e) { console.error('Card render error:', l.id, e); return '' }
+    }).join('')
   }
   const countEl = document.getElementById('listing-count')
   if (countEl) countEl.textContent = listings.length
