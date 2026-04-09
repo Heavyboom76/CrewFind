@@ -9,8 +9,14 @@ let unreadCount = 0
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 export async function initMessages() {
+  // Retry unread count after a short delay to ensure auth is settled
   await refreshUnreadCount()
+  setTimeout(refreshUnreadCount, 2000)
   subscribeToNewMessages()
+}
+
+export async function checkUnread() {
+  await refreshUnreadCount()
 }
 
 // ── Unread badge ──────────────────────────────────────────────────────────────
@@ -138,6 +144,7 @@ export function openMessagesTab() {
   document.getElementById('tab-browse').style.display = 'none'
   document.getElementById('tab-my-posts').style.display = 'none'
   document.getElementById('tab-messages').style.display = 'block'
+  refreshUnreadCount()
   renderInbox()
 }
 

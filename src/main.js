@@ -39,7 +39,7 @@ window.setPostType = setPostType
 
 import { selectShip } from './js/ships.js'
 import { toggleInVerseStatus, changeHandle } from './js/listings.js'
-import { initMessages, renderInbox, openChat, startConversation, sendMessage, clearConversation, blockUser, openMessagesTab } from './js/messages.js'
+import { initMessages, renderInbox, openChat, startConversation, sendMessage, clearConversation, blockUser, openMessagesTab, checkUnread } from './js/messages.js'
 import { openProfile, closeProfile, submitRating, saveProfileField, triggerAvatarUpload, uploadAvatar, toggleAddShip, addShipToHangar, removeShipFromHangar, copyToClipboard } from './js/profile.js'
 window.selectShip = selectShip
 window.toggleInVerseStatus = toggleInVerseStatus
@@ -89,6 +89,8 @@ initShipSearch()
 await initAuth()
 await initMessages()
 await renderListings()
+// Re-check unread after everything is loaded and auth is confirmed
+setTimeout(checkUnread, 1500)
 
 // Tab handlers — set up after everything is loaded
 document.getElementById('tab-btn-browse')?.addEventListener('click', async function() {
