@@ -290,7 +290,7 @@ export async function renderListings() {
   if (!grid) return
   grid.innerHTML = '<div style="padding:40px;text-align:center;font-family:monospace;color:#5a7a9a;letter-spacing:1px">[ LOADING... ]</div>'
   try {
-    let query = sb.from('listings').select('*').eq('hidden', false).order('created_at', { ascending: false })
+    let query = sb.from('listings').select('*').neq('hidden', true).order('created_at', { ascending: false })
     if (activeFilter === 'solo') query = query.in('post_type', ['lfg','lfm'])
     else if (activeFilter === 'org') query = query.eq('post_type', 'org')
     else if (activeFilter !== 'all') query = query.eq('mission', activeFilter).is('post_type', null)
