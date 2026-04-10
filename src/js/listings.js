@@ -25,6 +25,12 @@ export function filterBy(type, btn) {
   renderListings()
 }
 
+export function filterBySelect(type) {
+  activeFilter = type
+  clearSearch()
+  renderListings()
+}
+
 export function onSearchInput(val) {
   searchQuery = val.trim().toLowerCase()
   document.getElementById('search-clear-btn')?.classList.toggle('visible', searchQuery.length > 0)
@@ -176,7 +182,7 @@ function renderCard(l, isMine) {
   const statusClass = playerStatuses[l.owner?.toUpperCase()] === 'in-verse' ? 'in-verse' : ''
 
   if (isOrg) return `
-    <div class="card org-recruit" style="animation-delay:${Math.random()*0.2}s">
+    <div class="card org-recruit" style="animation-delay:${Math.random()*0.2}s" onclick="openProfile('${l.owner}')">
       ${l.org_poster_url ? `<img class="org-poster-img" src="${l.org_poster_url}" alt="Org poster" onerror="this.style.display='none'" />` : ''}
       <div class="org-card-body">
         <div class="card-header" style="margin-bottom:10px">
@@ -198,11 +204,11 @@ function renderCard(l, isMine) {
         <div class="card-footer">
           <div class="card-meta ${expiryClass(l.expires_at)}">${expiryCountdown(l.expires_at)}</div>
           ${isMine
-            ? `<div style="display:flex;gap:6px">
+            ? `<div style="display:flex;gap:6px" onclick="event.stopPropagation()">
                 <button class="btn-apply" style="border-color:var(--accent);color:var(--accent)" onclick="bumpListing('${l.id}')"><span>BUMP</span></button>
                 <button class="btn-apply" style="border-color:var(--danger);color:var(--danger)" onclick="deleteListing('${l.id}')"><span>DELETE</span></button>
                </div>`
-            : `<button class="btn-apply ${applied?'applied':''}" style="border-color:var(--accent2);color:var(--accent2)" onclick="openApply('${l.id}')"><span>${applied?'✓ CONTACTED':'CONTACT ORG'}</span></button>`
+            : `<button class="btn-apply ${applied?'applied':''}" style="border-color:var(--accent2);color:var(--accent2)" onclick="event.stopPropagation();openApply('${l.id}')"><span>${applied?'✓ CONTACTED':'CONTACT ORG'}</span></button>`
           }
         </div>
       </div>
@@ -213,7 +219,7 @@ function renderCard(l, isMine) {
     const badgeClass = isSoloLfg ? 'lfg' : 'lfm'
     const badgeText = isSoloLfg ? '🔍 LFG — Looking for Crew' : '👥 LFM — Solo Teamup'
     return `
-    <div class="card ${soloClass}" style="animation-delay:${Math.random()*0.2}s">
+    <div class="card ${soloClass}" style="animation-delay:${Math.random()*0.2}s" onclick="openProfile('${l.owner}')">
       <div class="card-header">
         <div class="ship-name">${(l.ship||'No Ship Listed').toUpperCase()}</div>
         <span class="solo-badge ${badgeClass}">${badgeText}</span>
@@ -221,7 +227,7 @@ function renderCard(l, isMine) {
       <div class="card-owner">
         <div class="owner-avatar" style="border-color:${isSoloLfg?'rgba(79,232,168,0.4)':'rgba(176,143,232,0.4)'};background:${isSoloLfg?'rgba(79,232,168,0.1)':'rgba(176,143,232,0.1)'};color:${isSoloLfg?'var(--success)':'#b08fe8'};overflow:hidden">${avatarCache[l.owner?.toUpperCase()] ? `<img src="${avatarCache[l.owner.toUpperCase()]}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" />` : l.owner.slice(0,2)}</div>
         <div class="owner-info">
-          <div class="owner-handle"><span class="card-status-dot ${statusClass}"></span><span onclick="openProfile('${l.owner}')" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px">${l.owner}</span>${l.org?` <span style="font-size:9px;color:var(--accent2);letter-spacing:1px;border:1px solid rgba(232,168,79,0.3);padding:1px 5px;margin-left:4px">${l.org}</span>`:''}</div>
+          <div class="owner-handle"><span class="card-status-dot ${statusClass}"></span>${l.owner}${l.org?` <span style="font-size:9px;color:var(--accent2);letter-spacing:1px;border:1px solid rgba(232,168,79,0.3);padding:1px 5px;margin-left:4px">${l.org}</span>`:''}</div>
           <div class="owner-meta">${timezoneLabel(l.timezone||'')} · ${l.playstyle||''}</div>
         </div>
       </div>
@@ -230,19 +236,18 @@ function renderCard(l, isMine) {
       <div class="card-footer">
         <div class="card-meta ${expiryClass(l.expires_at)}">${expiryCountdown(l.expires_at)}</div>
         ${isMine
-          ? `<div style="display:flex;gap:6px">
+          ? `<div style="display:flex;gap:6px" onclick="event.stopPropagation()">
               <button class="btn-apply" style="border-color:var(--accent);color:var(--accent)" onclick="bumpListing('${l.id}')"><span>BUMP</span></button>
               <button class="btn-apply" style="border-color:var(--danger);color:var(--danger)" onclick="deleteListing('${l.id}')"><span>DELETE</span></button>
              </div>`
-          : `<button class="btn-apply ${applied?'applied':''}" style="${isSoloLfg?'border-color:var(--success);color:var(--success)':'border-color:#b08fe8;color:#b08fe8'}" onclick="openApply('${l.id}')"><span>${applied?'✓ CONTACTED':'CONTACT'}</span></button>`
+          : `<button class="btn-apply ${applied?'applied':''}" style="${isSoloLfg?'border-color:var(--success);color:var(--success)':'border-color:#b08fe8;color:#b08fe8'}" onclick="event.stopPropagation();openApply('${l.id}')"><span>${applied?'✓ CONTACTED':'CONTACT'}</span></button>`
         }
       </div>
     </div>`
   }
 
-  const groupedRoles = groupRoles(l.roles)
   return `
-  <div class="card" style="animation-delay:${Math.random()*0.2}s">
+  <div class="card" style="animation-delay:${Math.random()*0.2}s" onclick="openProfile('${l.owner}')">
     <div class="card-header">
       <div class="ship-name">${(l.ship||'UNKNOWN SHIP').toUpperCase()}</div>
       <div class="mission-type ${missionColor(l.mission)}">${missionLabel(l.mission)}</div>
@@ -263,11 +268,11 @@ function renderCard(l, isMine) {
         ${l.roles.length} slot${l.roles.length>1?'s':''} open${l.expires_at?' · '+expiryCountdown(l.expires_at):''}
       </div>
       ${isMine
-        ? `<div style="display:flex;gap:6px">
+        ? `<div style="display:flex;gap:6px" onclick="event.stopPropagation()">
             <button class="btn-apply" style="border-color:var(--accent);color:var(--accent)" onclick="bumpListing('${l.id}')"><span>BUMP</span></button>
             <button class="btn-apply" style="border-color:var(--danger);color:var(--danger)" onclick="deleteListing('${l.id}')"><span>DELETE</span></button>
            </div>`
-        : `<div style="display:flex;gap:6px">
+        : `<div style="display:flex;gap:6px" onclick="event.stopPropagation()">
             <button class="btn-apply ${applied?'applied':''}" onclick="openApply('${l.id}')"><span>${applied?'✓ APPLIED':'APPLY'}</span></button>
             <button class="btn-apply" onclick="startConversation('${l.owner}')" style="border-color:var(--text-dim);color:var(--text-dim)" title="Message pilot"><span>MSG</span></button>
            </div>`

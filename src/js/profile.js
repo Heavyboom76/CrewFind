@@ -337,7 +337,7 @@ function renderHangarDropdown(query) {
   const dropdown = document.getElementById('hangar-ship-dropdown')
   if (!dropdown) return
   const q = query.toLowerCase()
-  const filtered = SHIPS.filter(s => s.name.toLowerCase().includes(q) || s.manufacturer.toLowerCase().includes(q)).slice(0, 20)
+  const filtered = SHIPS.filter(s => s.name.toLowerCase().includes(q) || s.manufacturer.toLowerCase().includes(q)).slice(0, 50)
   dropdown.innerHTML = filtered.map(s => `
     <div class="ship-option" onclick="selectHangarShip('${s.name.replace(/'/g,"\\'")}','${s.manufacturer}')">
       ${s.name} <span class="manufacturer">${s.manufacturer}</span>

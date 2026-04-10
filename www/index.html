@@ -177,10 +177,30 @@
   .auth-tab-btn.active { background: rgba(79,168,232,0.1); color: var(--accent); }
   .btn-discord { width: 100%; padding: 14px; background: #5865F2; border: none; color: #fff; font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 16px; }
   .divider { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--text-dim); letter-spacing: 1px; text-align: center; margin-bottom: 16px; }
+  .filter-select {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 28px 6px 10px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235a7a9a'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    transition: border-color 0.15s;
+    min-width: 160px;
+  }
+  .filter-select:focus { border-color: var(--accent); }
   .btn-ghost { width: 100%; padding: 12px; background: transparent; border: 1px solid var(--border-bright); color: var(--accent); font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; }
 </style>
-  <script type="module" crossorigin src="/assets/index-CdmrF7xD.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/auth-D-YLg91E.js">
+  <script type="module" crossorigin src="/assets/index-DUeC6W65.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/auth-D9-Pvbu8.js">
 </head>
 <body>
 <div class="scanlines"></div>
@@ -303,17 +323,19 @@
   <nav>
     <div class="nav-top">
       <div class="logo">CREW<span>FIND</span></div>
-      <button class="btn-new-post" id="btn-open-post" onclick="openPostModal()">+ POST</button>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="pilot-badge" onclick="changeHandle()" style="cursor:pointer">
+          <div class="pilot-dot"></div>
+          <span id="pilot-handle">---</span>
+        </div>
+        <button class="btn-new-post" id="btn-open-post" onclick="openPostModal()">+ POST</button>
+      </div>
     </div>
     <div class="nav-bottom">
       <button class="nav-tab active" id="tab-btn-browse" onclick="setTabById('browse', this)">Browse</button>
       <button class="nav-tab" id="tab-btn-my-posts" onclick="setTabById('my-posts', this)">My Posts</button>
-      <button class="nav-tab" id="tab-btn-messages" onclick="openMessagesTab()">Messages<span id="messages-badge" style="display:none;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:var(--danger);color:#fff;font-size:8px;font-weight:700;margin-left:4px;font-family:'Share Tech Mono',monospace;vertical-align:middle">0</span></button>
-      <button class="nav-tab" id="tab-btn-profile" onclick="openOwnProfile()">My Profile</button>
-      <div class="pilot-badge" onclick="changeHandle()">
-        <div class="pilot-dot"></div>
-        <span id="pilot-handle">---</span>
-      </div>
+      <button class="nav-tab" id="tab-btn-messages" onclick="openMessagesTab()">MSG<span id="messages-badge" style="display:none;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:var(--danger);color:#fff;font-size:8px;font-weight:700;margin-left:4px;font-family:'Share Tech Mono',monospace;vertical-align:middle">0</span></button>
+      <button class="nav-tab" id="tab-btn-profile" onclick="openOwnProfile()">Profile</button>
     </div>
   </nav>
 
@@ -341,19 +363,21 @@
       </div>
       <div class="filters">
         <span class="filter-label">Mission:</span>
-        <button class="filter-chip active" onclick="filterBy('all', this)">All</button>
-        <button class="filter-chip" onclick="filterBy('bounty', this)">Bounty</button>
-        <button class="filter-chip" onclick="filterBy('cargo', this)">Cargo</button>
-        <button class="filter-chip" onclick="filterBy('patrol', this)">Patrol</button>
-        <button class="filter-chip" onclick="filterBy('explore', this)">Explore</button>
-        <button class="filter-chip" onclick="filterBy('mining', this)">Mining</button>
-        <button class="filter-chip" onclick="filterBy('salvage', this)">Salvage</button>
-        <button class="filter-chip" onclick="filterBy('medical', this)">Medical</button>
-        <button class="filter-chip" onclick="filterBy('piracy', this)">PvP</button>
-        <button class="filter-chip" onclick="filterBy('escort', this)">Escort</button>
-        <button class="filter-chip" onclick="filterBy('ground', this)">Ground</button>
-        <button class="filter-chip" onclick="filterBy('solo', this)">Solo/LFG</button>
-        <button class="filter-chip" onclick="filterBy('org', this)">Org Recruit</button>
+        <select class="filter-select" id="mission-filter" onchange="filterBySelect(this.value)">
+          <option value="all">All</option>
+          <option value="bounty">Bounty Hunting</option>
+          <option value="cargo">Cargo Run</option>
+          <option value="patrol">Patrol</option>
+          <option value="explore">Exploration</option>
+          <option value="mining">Mining</option>
+          <option value="salvage">Salvage</option>
+          <option value="medical">Medical</option>
+          <option value="piracy">PvP/Piracy</option>
+          <option value="escort">Escort</option>
+          <option value="ground">Ground Combat</option>
+          <option value="solo">Solo/LFG</option>
+          <option value="org">Org Recruit</option>
+        </select>
       </div>
       <div class="listings" id="listings-grid"></div>
       <div class="empty" id="empty-state">[ NO MATCHING CREW LISTINGS ]</div>
@@ -467,7 +491,7 @@
    'submitPost','adjustRole','previewOrgPoster','setPostType','selectShip','toggleInVerseStatus',
    'changeHandle','copyDiscord','openProfile','closeProfile','openOwnProfile','submitRating',
    'saveProfileField','triggerAvatarUpload','uploadAvatar','toggleAddShip','addShipToHangar',
-   'removeShipFromHangar','copyToClipboard','setRating','selectHangarShip','openMessagesTab','startConversation','openChat','renderInbox','clearConversation','blockUser'].forEach(fn => {
+   'removeShipFromHangar','copyToClipboard','setRating','selectHangarShip','openMessagesTab','startConversation','openChat','renderInbox','clearConversation','blockUser','filterBySelect'].forEach(fn => {
     window[fn] = window[fn] || function(...args) {
       document.addEventListener('crewfind:ready', () => window[fn](...args), { once: true })
     }
