@@ -247,6 +247,7 @@ function renderCard(l, isMine) {
     </div>`
   }
 
+  const groupedRoles = groupRoles(l.roles)
   return `
   <div class="card" style="animation-delay:${Math.random()*0.2}s" onclick="openProfile('${l.owner}')">
     <div class="card-header">
