@@ -2,6 +2,7 @@ import { sb } from './supabase.js'
 import { showToast } from './ui.js'
 import { getCurrentUser, getCurrentHandle } from './auth.js'
 import { SHIPS } from './ships.js'
+import { reportButtonHtml } from './admin.js'
 
 // Track which profile is currently open
 let currentProfileHandle = ''
@@ -51,6 +52,13 @@ export async function openProfile(handle) {
     if (!profile) {
       clearTimeout(loadTimeout)
       body.innerHTML = '<div style="padding:40px;text-align:center;font-family:monospace;color:#e84f4f">[ PILOT NOT FOUND ]</div>'
+      return
+    }
+
+    // Check if profile is hidden/banned
+    if (profile.hidden && !isOwnProfile) {
+      clearTimeout(loadTimeout)
+      body.innerHTML = '<div style="padding:40px;text-align:center;font-family:\'Share Tech Mono\',monospace;color:var(--text-dim);letter-spacing:1px">[ THIS PILOT IS UNDER REVIEW ]</div>'
       return
     }
 
@@ -108,7 +116,10 @@ export async function openProfile(handle) {
           <button onclick="startConversation('${handle}')" style="margin-top:10px;padding:7px 16px;background:transparent;border:1px solid var(--accent);color:var(--accent);font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;width:100%;transition:all 0.15s"
             onmouseover="this.style.background='rgba(79,168,232,0.1)'" onmouseout="this.style.background='transparent'">
             ✉ MESSAGE PILOT
-          </button>` : ''}
+          </button>
+          <div style="margin-top:6px;text-align:right">
+            ${reportButtonHtml('profile', handle)}
+          </div>` : ''}
         </div>
       </div>
 

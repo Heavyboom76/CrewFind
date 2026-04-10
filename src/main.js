@@ -41,6 +41,7 @@ window.setPostType = setPostType
 import { selectShip } from './js/ships.js'
 import { toggleInVerseStatus, changeHandle } from './js/listings.js'
 import { initMessages, renderInbox, openChat, startConversation, sendMessage, clearConversation, blockUser, openMessagesTab, checkUnread } from './js/messages.js'
+import { checkAdminStatus, openAdminPanel, reportButtonHtml, openReportModal, closeReportModal, submitReport, adminHide, adminUnhide, adminBanUser, adminDismissReport, adminAddAdmin, adminRemoveAdmin } from './js/admin.js'
 import { openProfile, closeProfile, submitRating, saveProfileField, triggerAvatarUpload, uploadAvatar, toggleAddShip, addShipToHangar, removeShipFromHangar, copyToClipboard } from './js/profile.js'
 window.selectShip = selectShip
 window.toggleInVerseStatus = toggleInVerseStatus
@@ -56,8 +57,14 @@ window.addShipToHangar = addShipToHangar
 window.removeShipFromHangar = removeShipFromHangar
 window.copyToClipboard = copyToClipboard
 window.openOwnProfile = () => { import('./js/auth.js').then(m => openProfile(m.getCurrentHandle())) }
-window.startConversation = startConversation
-window.openMessagesTab = openMessagesTab
+window.openAdminPanel = openAdminPanel
+window.reportButtonHtml = reportButtonHtml
+window.openReportModal = openReportModal
+window.closeReportModal = closeReportModal
+window.submitReport = submitReport
+
+// Re-export admin window functions already set in admin.js
+// (adminHide, adminUnhide, adminBanUser etc are set via window.xxx in admin.js)
 window.openChat = openChat
 window.renderInbox = renderInbox
 window.clearConversation = clearConversation
@@ -90,7 +97,7 @@ initShipSearch()
 await initAuth()
 await initMessages()
 await renderListings()
-// Re-check unread after everything is loaded and auth is confirmed
+await checkAdminStatus()
 setTimeout(checkUnread, 1500)
 
 // Tab handlers — set up after everything is loaded

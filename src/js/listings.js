@@ -1,6 +1,7 @@
 import { sb } from './supabase.js'
 import { showToast, missionLabel, expiryLabel, isExpiringSoon, openExternalUrl } from './ui.js'
 import { getCurrentHandle, getCurrentUser } from './auth.js'
+import { reportButtonHtml } from './admin.js'
 
 export let listings = []
 export let myPosts = []
@@ -272,7 +273,8 @@ function renderCard(l, isMine) {
             <button class="btn-apply" style="border-color:var(--accent);color:var(--accent)" onclick="bumpListing('${l.id}')"><span>BUMP</span></button>
             <button class="btn-apply" style="border-color:var(--danger);color:var(--danger)" onclick="deleteListing('${l.id}')"><span>DELETE</span></button>
            </div>`
-        : `<div style="display:flex;gap:6px" onclick="event.stopPropagation()">
+        : `<div style="display:flex;gap:6px;align-items:center" onclick="event.stopPropagation()">
+            ${reportButtonHtml('listing', l.id)}
             <button class="btn-apply ${applied?'applied':''}" onclick="openApply('${l.id}')"><span>${applied?'✓ APPLIED':'APPLY'}</span></button>
             <button class="btn-apply" onclick="startConversation('${l.owner}')" style="border-color:var(--text-dim);color:var(--text-dim)" title="Message pilot"><span>MSG</span></button>
            </div>`
@@ -288,7 +290,7 @@ export async function renderListings() {
   if (!grid) return
   grid.innerHTML = '<div style="padding:40px;text-align:center;font-family:monospace;color:#5a7a9a;letter-spacing:1px">[ LOADING... ]</div>'
   try {
-    let query = sb.from('listings').select('*').order('created_at', { ascending: false })
+    let query = sb.from('listings').select('*').eq('hidden', false).order('created_at', { ascending: false })
     if (activeFilter === 'solo') query = query.in('post_type', ['lfg','lfm'])
     else if (activeFilter === 'org') query = query.eq('post_type', 'org')
     else if (activeFilter !== 'all') query = query.eq('mission', activeFilter).is('post_type', null)

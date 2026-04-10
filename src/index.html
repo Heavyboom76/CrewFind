@@ -334,6 +334,7 @@
       <button class="nav-tab" id="tab-btn-my-posts" onclick="setTabById('my-posts', this)">My Posts</button>
       <button class="nav-tab" id="tab-btn-messages" onclick="openMessagesTab()">MSG<span id="messages-badge" style="display:none;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:var(--danger);color:#fff;font-size:8px;font-weight:700;margin-left:4px;font-family:'Share Tech Mono',monospace;vertical-align:middle">0</span></button>
       <button class="nav-tab" id="tab-btn-profile" onclick="openOwnProfile()">Profile</button>
+      <button class="nav-tab" id="tab-btn-admin" onclick="openAdminPanel()" style="display:none;color:var(--danger)">⚙ Admin</button>
     </div>
   </nav>
 
@@ -383,6 +384,9 @@
 
     <!-- MESSAGES TAB -->
     <div id="tab-messages" style="display:none"></div>
+
+    <!-- ADMIN TAB -->
+    <div id="tab-admin" style="display:none"></div>
 
     <!-- MY POSTS TAB -->
     <div id="tab-my-posts" style="display:none">
@@ -490,7 +494,7 @@
    'submitPost','adjustRole','previewOrgPoster','setPostType','selectShip','toggleInVerseStatus',
    'changeHandle','copyDiscord','openProfile','closeProfile','openOwnProfile','submitRating',
    'saveProfileField','triggerAvatarUpload','uploadAvatar','toggleAddShip','addShipToHangar',
-   'removeShipFromHangar','copyToClipboard','setRating','selectHangarShip','openMessagesTab','startConversation','openChat','renderInbox','clearConversation','blockUser','filterBySelect'].forEach(fn => {
+   'removeShipFromHangar','copyToClipboard','setRating','selectHangarShip','openMessagesTab','startConversation','openChat','renderInbox','clearConversation','blockUser','filterBySelect','openReportModal','closeReportModal','submitReport','openAdminPanel','adminHide','adminUnhide','adminBanUser','adminDismissReport','adminAddAdmin','adminRemoveAdmin'].forEach(fn => {
     window[fn] = window[fn] || function(...args) {
       document.addEventListener('crewfind:ready', () => window[fn](...args), { once: true })
     }
