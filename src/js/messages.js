@@ -383,7 +383,7 @@ export async function blockUser(blockedHandle) {
   } catch (e) { showToast('// ERROR: Could not block user') }
 }
 window.blockUser = blockUser
-
+window.openMessagesTab = openMessagesTab
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function timeAgo(ts) {
   if (!ts) return ''
