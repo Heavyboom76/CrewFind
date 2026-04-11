@@ -99,6 +99,8 @@ function subscribeToNewMessages() {
 
 // ── Start or open a conversation ──────────────────────────────────────────────
 export async function startConversation(otherHandle, listingId = null) {
+  console.log('startConversation called with:', otherHandle)
+  console.log('myHandle:', getCurrentHandle())
   const myHandle = getCurrentHandle()
   if (!myHandle) { showToast('// LOGIN REQUIRED TO MESSAGE'); return }
   if (otherHandle.toLowerCase() === myHandle.toLowerCase()) { showToast('// CANNOT MESSAGE YOURSELF'); return }
