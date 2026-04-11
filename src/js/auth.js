@@ -60,6 +60,7 @@ export async function initAuth() {
 }
 
 async function handleSession(session) {
+  console.log('handleSession called, user:', session?.user?.email)
   currentUser = session.user
   // Load profile — use maybeSingle so no error if profile doesn't exist yet
   const { data: profile } = await sb
