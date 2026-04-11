@@ -400,3 +400,4 @@ export function copyToClipboard(text) {
   navigator.clipboard.writeText(text).then(() => showToast('// COPIED: ' + text))
 }
 window.copyToClipboard = copyToClipboard
+window.startConversation = startConversation
