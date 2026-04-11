@@ -3,7 +3,7 @@ import { showToast } from './ui.js'
 import { getCurrentUser, getCurrentHandle } from './auth.js'
 import { SHIPS } from './ships.js'
 import { reportButtonHtml } from './admin.js'
-
+import { startConversation } from './messaging.js'
 // Track which profile is currently open
 let currentProfileHandle = ''
 
