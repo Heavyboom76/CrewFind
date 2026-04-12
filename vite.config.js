@@ -9,7 +9,7 @@ export default defineConfig({
   publicDir: resolve(__dirname, 'src/public'),
   build: {
     outDir: '../www',
-    emptyOutDir: true,
+    emptyOutDir: false,
   },
   server: {
     open: true,
