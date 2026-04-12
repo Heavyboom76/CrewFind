@@ -340,14 +340,37 @@ export async function deleteAccount() {
 }
 
 // ── RSI Handle (guest) ────────────────────────────────────────────────────────
-export function saveHandle() {
+export async function saveHandle() {
   const h = document.getElementById('onboard-handle')?.value?.trim()
   if (!h) { showToast('// ERROR: Enter your RSI handle'); return }
-  currentHandle = h
-  localStorage.setItem('rsi_handle', h)
-  updateNavHandle(h)
-  hideOnboarding()
-  renderListings()
+
+  const btn = document.getElementById('btn-guest')
+  if (btn) { btn.textContent = 'CHECKING...'; btn.disabled = true }
+
+  try {
+    // Block guests from impersonating any registered user
+    const { data: existing } = await sb
+      .from('profiles')
+      .select('id')
+      .ilike('rsi_handle', h)
+      .maybeSingle()
+
+    if (existing) {
+      showToast('// ERROR: That handle belongs to a registered account — please log in')
+      if (btn) { btn.textContent = 'ENTER AS GUEST'; btn.disabled = false }
+      return
+    }
+
+    currentHandle = h
+    localStorage.setItem('rsi_handle', h)
+    updateNavHandle(h)
+    hideOnboarding()
+    renderListings()
+  } catch (e) {
+    console.error('Guest handle check error:', e)
+    showToast('// ERROR: Could not verify handle')
+    if (btn) { btn.textContent = 'ENTER AS GUEST'; btn.disabled = false }
+  }
 }
 
 // ── UI helpers ────────────────────────────────────────────────────────────────
