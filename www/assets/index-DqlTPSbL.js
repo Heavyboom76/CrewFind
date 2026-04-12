@@ -138,11 +138,8 @@ import{A as e,B as t,C as n,D as r,F as i,H as a,I as o,L as s,M as c,N as l,O a
       <div style="margin-bottom:20px">
         <div style="font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;margin-bottom:8px">// Active Listings (${u.length})</div>
         <div style="display:flex;flex-direction:column;gap:8px">
-          ${u.map(e=>`
-            <div style="padding:10px 12px;border:1px solid var(--border);background:var(--bg);font-family:'Share Tech Mono',monospace;font-size:10px">
-              <div style="color:var(--text-bright);margin-bottom:4px">${(e.ship||e.org_name||`LISTING`).toUpperCase()}</div>
-              <div style="color:var(--text-dim)">${e.mission?e.mission.toUpperCase():``} · ${e.playstyle||``}</div>
-            </div>`).join(``)}
+        ${u.map(e=>{let t=h?`<div style="display:flex;gap:8px;margin-top:8px"><button onclick="bumpListing('`+e.id+`')" style="background:none;border:1px solid var(--accent);color:var(--accent);font-family:'Share Tech Mono',monospace;font-size:9px;padding:3px 10px;cursor:pointer;letter-spacing:1px">↑ BUMP</button><button onclick="deleteListing('`+e.id+`')" style="background:none;border:1px solid var(--danger);color:var(--danger);font-family:'Share Tech Mono',monospace;font-size:9px;padding:3px 10px;cursor:pointer;letter-spacing:1px">✕ DELETE</button></div>`:``;return`<div style="padding:10px 12px;border:1px solid var(--border);background:var(--bg);font-family:'Share Tech Mono',monospace;font-size:10px"><div style="color:var(--text-bright);margin-bottom:4px">`+(e.ship||e.org_name||`LISTING`).toUpperCase()+`</div><div style="color:var(--text-dim);margin-bottom:4px">`+(e.mission?e.mission.toUpperCase():``)+` · `+(e.playstyle||``)+`</div>`+t+`</div>`}).join(``)}
+
         </div>
       </div>`:``}
 

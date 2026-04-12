@@ -183,11 +183,11 @@ export async function openProfile(handle) {
       <div style="margin-bottom:20px">
         <div style="font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;margin-bottom:8px">// Active Listings (${listings.length})</div>
         <div style="display:flex;flex-direction:column;gap:8px">
-          ${listings.map(l => `
-            <div style="padding:10px 12px;border:1px solid var(--border);background:var(--bg);font-family:'Share Tech Mono',monospace;font-size:10px">
-              <div style="color:var(--text-bright);margin-bottom:4px">${(l.ship || l.org_name || 'LISTING').toUpperCase()}</div>
-              <div style="color:var(--text-dim)">${l.mission ? l.mission.toUpperCase() : ''} · ${l.playstyle || ''}</div>
-            </div>`).join('')}
+        ${listings.map(l => {
+  const btns = isOwnProfile ? '<div style="display:flex;gap:8px;margin-top:8px"><button onclick="bumpListing(\'' + l.id + '\')" style="background:none;border:1px solid var(--accent);color:var(--accent);font-family:\'Share Tech Mono\',monospace;font-size:9px;padding:3px 10px;cursor:pointer;letter-spacing:1px">↑ BUMP</button><button onclick="deleteListing(\'' + l.id + '\')" style="background:none;border:1px solid var(--danger);color:var(--danger);font-family:\'Share Tech Mono\',monospace;font-size:9px;padding:3px 10px;cursor:pointer;letter-spacing:1px">✕ DELETE</button></div>' : '';
+  return '<div style="padding:10px 12px;border:1px solid var(--border);background:var(--bg);font-family:\'Share Tech Mono\',monospace;font-size:10px"><div style="color:var(--text-bright);margin-bottom:4px">' + (l.ship || l.org_name || 'LISTING').toUpperCase() + '</div><div style="color:var(--text-dim);margin-bottom:4px">' + (l.mission ? l.mission.toUpperCase() : '') + ' · ' + (l.playstyle || '') + '</div>' + btns + '</div>';
+}).join('')}
+
         </div>
       </div>` : ''}
 
