@@ -1,2 +1,4 @@
-/privacy    /privacy.html    200
-/*          /index.html      200
+/privacy   /privacy.html   200
+/app       /app.html       200
+/app/*     /app.html       200
+/*         /app.html       200
