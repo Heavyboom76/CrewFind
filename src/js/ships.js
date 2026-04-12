@@ -49,6 +49,8 @@ export const SHIPS = [
   { name: 'Freelancer DUR', manufacturer: 'MISC', type: 'multi' },
   { name: 'Freelancer MAX', manufacturer: 'MISC', type: 'multi' },
   { name: 'Freelancer MIS', manufacturer: 'MISC', type: 'multi' },
+  { name: 'Hull A',manufacturer: 'MISC', type: 'multi'},
+  { name: 'Hull B',manufacturer: 'MISC', type: 'multi'},
   { name: 'Hull C', manufacturer: 'MISC', type: 'multi' },
   { name: 'Reliant Kore', manufacturer: 'MISC', type: 'multi' },
   { name: 'Reliant Mako', manufacturer: 'MISC', type: 'multi' },
@@ -217,7 +219,7 @@ function setupShipSearch(inputId, dropdownId, hiddenId, types) {
     selectedShipIndex = -1
   })
   input.addEventListener('blur', () => {
-    setTimeout(() => dropdown.classList.remove('open'), 150)
+    setTimeout(() => dropdown.classList.remove('open'), 200)
   })
   input.addEventListener('keydown', e => {
     const options = dropdown.querySelectorAll('.ship-option')
