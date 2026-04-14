@@ -43,23 +43,22 @@ $$;
 -- profiles
 -- ============================================================
 
--- Anyone (including anon) can read non-hidden, non-banned profiles
+-- Anyone (including anon) can read non-hidden profiles
 CREATE POLICY "profiles: public read"
   ON profiles FOR SELECT
   USING (
-    (hidden IS NOT TRUE AND banned IS NOT TRUE)
+    hidden IS NOT TRUE
     OR id = auth.uid()   -- owner always sees own profile
     OR is_admin()        -- admins see all
   );
 
 -- Only the owner can update their own profile
--- Prevents changing id, rsi_handle, banned, hidden (admin-only fields)
+-- Prevents changing id, rsi_handle, hidden (admin-only field)
 CREATE POLICY "profiles: owner update"
   ON profiles FOR UPDATE
   USING (id = auth.uid())
   WITH CHECK (
     id = auth.uid()
-    AND banned = (SELECT banned FROM profiles WHERE id = auth.uid())
     AND hidden = (SELECT hidden FROM profiles WHERE id = auth.uid())
   );
 
