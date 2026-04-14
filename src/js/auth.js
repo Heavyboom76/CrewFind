@@ -5,6 +5,7 @@ import { renderListings } from './listings.js'
 export let currentUser = null
 export let currentHandle = ''
 export let currentProfile = null
+let isGuestSession = false
 
 export function setCurrentUser(user) { currentUser = user }
 export function setCurrentHandle(handle) { currentHandle = handle }
@@ -14,6 +15,7 @@ export function setCurrentProfile(profile) { currentProfile = profile }
 export function getCurrentUser() { return currentUser }
 export function getCurrentHandle() { return currentHandle }
 export function getCurrentProfile() { return currentProfile }
+export function getIsGuest() { return isGuestSession }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 export async function initAuth() {
@@ -34,6 +36,7 @@ export async function initAuth() {
     } else {
       const saved = localStorage.getItem('rsi_handle')
       if (saved) {
+        isGuestSession = true
         currentHandle = saved
         updateNavHandle(saved)
         hideOnboarding()
@@ -61,6 +64,7 @@ export async function initAuth() {
 
 async function handleSession(session) {
   console.log('handleSession called, user:', session?.user?.email)
+  isGuestSession = false
   currentUser = session.user
   // Load profile — use maybeSingle so no error if profile doesn't exist yet
   const { data: profile } = await sb
@@ -361,6 +365,7 @@ export async function saveHandle() {
       return
     }
 
+    isGuestSession = true
     currentHandle = h
     localStorage.setItem('rsi_handle', h)
     updateNavHandle(h)
