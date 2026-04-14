@@ -91,6 +91,27 @@
     text-transform: uppercase;
   }
   .nav-logo span { color: var(--text-dim); font-weight: 300; }
+  .erkul-link {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+  .erkul-link .erkul { color: #5bde7a; }
+  .erkul-link .games { color: #f5a623; font-weight: 300; }
+  .scmdb-link {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+  .scmdb-link .sc { color: #4fa8e8; }
+  .scmdb-link .mdb { color: var(--text); font-weight: 700; }
+  .scmdb-link .sub { color: var(--text-dim); font-weight: 300; font-size: 1.35rem; }
   nav a {
     font-family: 'Rajdhani', sans-serif;
     font-size: 0.8rem;
@@ -430,13 +451,13 @@
 
   <!-- NAV -->
   <nav>
-    <div class="nav-logo">Crew<span>Find</span></div>
-    <a href="#" onclick="openPrivacy(event)">Privacy Policy</a>
+    <a href="https://erkul.games" target="_blank" class="erkul-link"><span class="erkul">erkul</span><span class="games">.games</span></a>
+    <a href="https://scmdb.net" target="_blank" class="scmdb-link"><span class="sc">SC</span><span class="mdb">MDB.NET</span><span class="sub"> // Mission Database</span></a>
   </nav>
 
   <!-- HERO -->
   <section class="hero">
-    <div class="hero-badge">Star Citizen Crew Matchmaking</div>
+    <div class="hero-badge">Star Citizen Player Network</div>
     <h1 class="hero-title"><span class="accent">Crew</span>Find</h1>
     <p class="hero-sub">Find your crew in the verse</p>
     <div class="hero-divider"></div>
