@@ -1,13 +1,13 @@
 import { sb } from './supabase.js'
 import { showToast } from './ui.js'
-import { getCurrentHandle } from './auth.js'
+import { getCurrentHandle, getIsGuest } from './auth.js'
 
 let isAdmin = false
 
 // ── Check admin status ────────────────────────────────────────────────────────
 export async function checkAdminStatus() {
   const handle = getCurrentHandle()
-  if (!handle) return false
+  if (!handle || getIsGuest()) return false
   try {
     const { data } = await sb.from('admins')
       .select('rsi_handle')

@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -E \"\\\\.\\(js|ts|json|yaml|yml\\)$|package\")",
+      "mcp__Claude_Preview__preview_start"
+    ]
+  }
+}

@@ -19,7 +19,7 @@ window.setNewPassword = setNewPassword
 window.deleteAccount = deleteAccount
 
 // Import and expose listing/post functions
-import { filterBy, filterBySelect, onSearchInput, clearSearch, openApply, closeApplyModal, submitApply, deleteListing, bumpListing, renderMyPosts } from './js/listings.js'
+import { filterBy, filterBySelect, onSearchInput, clearSearch, openApply, closeApplyModal, submitApply, deleteListing, bumpListing, renderMyPosts, goToPage } from './js/listings.js'
 window.filterBy = filterBy
 window.filterBySelect = filterBySelect
 window.onSearchInput = onSearchInput
@@ -29,6 +29,7 @@ window.closeApplyModal = closeApplyModal
 window.submitApply = submitApply
 window.deleteListing = deleteListing
 window.bumpListing = bumpListing
+window.goToPage = goToPage
 
 import { openPostModal, closePostModal, submitPost, adjustRole, previewOrgPoster, setPostType } from './js/post.js'
 window.openPostModal = openPostModal

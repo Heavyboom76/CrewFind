@@ -7,6 +7,8 @@ export let listings = []
 export let myPosts = []
 let activeFilter = 'all'
 let searchQuery = ''
+let currentPage = 1
+const PAGE_SIZE = 50
 let playerStatuses = {}
 let avatarCache = {}
 let myStatus = 'offline'
@@ -20,6 +22,7 @@ function saveAppliedIds() {
 // ── Filters / Search ──────────────────────────────────────────────────────────
 export function filterBy(type, btn) {
   activeFilter = type
+  currentPage = 1
   document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'))
   if (btn) btn.classList.add('active')
   clearSearch()
@@ -314,15 +317,50 @@ export async function renderListings() {
   if (listings.length === 0) {
     grid.innerHTML = ''
     if (empty) empty.style.display = 'block'
+    renderPagination(0)
   } else {
     if (empty) empty.style.display = 'none'
-    grid.innerHTML = listings.map(l => {
+    const paginated = listings.length >= PAGE_SIZE
+    const page = paginated ? currentPage : 1
+    const total = paginated ? Math.ceil(listings.length / PAGE_SIZE) : 1
+    const start = (page - 1) * PAGE_SIZE
+    const slice = paginated ? listings.slice(start, start + PAGE_SIZE) : listings
+    grid.innerHTML = slice.map(l => {
       try { return renderCard(l, false) }
       catch(e) { console.error('Card render error:', l.id, e); return '' }
     }).join('')
+    renderPagination(paginated ? total : 0, page)
   }
   const countEl = document.getElementById('listing-count')
   if (countEl) countEl.textContent = listings.length
+}
+
+function renderPagination(totalPages, currentPage = 1) {
+  const el = document.getElementById('listings-pagination')
+  if (!el) return
+  if (totalPages <= 1) { el.style.display = 'none'; return }
+  el.style.display = 'flex'
+  el.innerHTML = `
+    <button onclick="goToPage(${currentPage - 1})" ${currentPage <= 1 ? 'disabled' : ''}>◀ PREV</button>
+    <span>PAGE ${currentPage} / ${totalPages}</span>
+    <button onclick="goToPage(${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}>NEXT ▶</button>
+  `
+}
+
+export function goToPage(page) {
+  const totalPages = Math.ceil(listings.length / PAGE_SIZE)
+  if (page < 1 || page > totalPages) return
+  currentPage = page
+  const grid = document.getElementById('listings-grid')
+  if (!grid) return
+  const start = (page - 1) * PAGE_SIZE
+  const slice = listings.slice(start, start + PAGE_SIZE)
+  grid.innerHTML = slice.map(l => {
+    try { return renderCard(l, false) }
+    catch(e) { console.error('Card render error:', l.id, e); return '' }
+  }).join('')
+  renderPagination(totalPages, page)
+  grid.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
 export async function renderMyPosts() {
