@@ -402,7 +402,8 @@ async function fetchShipThumbnail(shipName) {
 
   // 2. Fetch thumbnail URL — try fandom wiki, fall back to starcitizen.tools
   try {
-    const encoded = encodeURIComponent(shipName.trim())
+    const searchName = cleanRsiName(shipName)
+    const encoded = encodeURIComponent(searchName)
     const sources = [
       `https://starcitizen.fandom.com/api.php?action=query&titles=${encoded}&prop=pageimages&format=json&pithumbsize=200&origin=*`,
       `https://starcitizen.tools/api.php?action=query&titles=${encoded}&prop=pageimages&format=json&pithumbsize=200&origin=*`,
@@ -421,7 +422,7 @@ async function fetchShipThumbnail(shipName) {
     }
 
     if (!wikiUrl) {
-      console.warn(`[crewfind] No thumbnail found for: ${shipName}`)
+      console.warn(`[crewfind] No thumbnail found for: "${searchName}" (original: "${shipName}")`)
       shipThumbCache.set(shipName, null)
       return null
     }
@@ -461,6 +462,22 @@ async function fetchShipThumbnail(shipName) {
   }
 }
 
+// ── Strip RSI pledge-store noise from ship names ──────────────────────────────
+// RSI account CSV exports use pledge item names like:
+//   "Standalone Ships - Paladin - 10 Year"
+//   "Standalone Ships - Buccaneer plus Nighttide Paint"
+// This strips prefixes/suffixes to get the bare ship name.
+function cleanRsiName(name) {
+  let s = name.trim()
+  s = s.replace(/^Standalone\s+Ships?\s*[-–]\s*/i, '')       // strip "Standalone Ships - "
+  s = s.replace(/^Complete\s+Ships?\s*[-–]\s*/i, '')         // strip "Complete Ship - "
+  s = s.replace(/\s+plus\s+.+$/i, '')                        // strip " plus Paint/Item"
+  s = s.replace(/\s*[-–]\s*\d+\s*[Yy]ear\s*$/i, '')         // strip " - 10 Year"
+  s = s.replace(/\s*[-–]\s*(Anniversary|Invictus|Showdown|Deluxe|Limited)\s*$/i, '')
+  s = s.replace(/\s*\(.*?\)\s*$/, '')                        // strip trailing " (anything)"
+  return s.trim()
+}
+
 // ── Parse hangar CSV — ships and vehicles only ────────────────────────────────
 const KNOWN_SHIP_NAMES = new Set(SHIPS.map(s => s.name.toLowerCase()))
 
@@ -479,17 +496,21 @@ function parseHangarCsv(text) {
     const name = cols[nameIdx]?.trim()
     if (!name) continue
 
+    // Clean RSI pledge-store prefixes/suffixes before matching
+    const cleanName = cleanRsiName(name)
+
     // If a type column exists, only accept rows classified as ship or vehicle
     if (typeIdx !== -1) {
       const type = cols[typeIdx]?.trim().toLowerCase() || ''
       if (!type.includes('ship') && !type.includes('vehicle')) continue
     } else {
-      // No type column — cross-reference against known ships list
-      if (!KNOWN_SHIP_NAMES.has(name.toLowerCase())) continue
+      // No type column — match cleaned name against known ships list
+      if (!KNOWN_SHIP_NAMES.has(cleanName.toLowerCase())) continue
     }
 
     const manufacturer = mfgIdx !== -1 ? cols[mfgIdx]?.trim() : ''
-    ships.push({ name, manufacturer: manufacturer || '' })
+    // Store the clean name, not the raw RSI pledge string
+    ships.push({ name: cleanName, manufacturer: manufacturer || '' })
   }
   return ships
 }
