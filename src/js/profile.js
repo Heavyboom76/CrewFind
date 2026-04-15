@@ -400,17 +400,28 @@ async function fetchShipThumbnail(shipName) {
     }
   } catch { /* table may not exist yet — fall through to fetch */ }
 
-  // 2. Fetch thumbnail URL from starcitizen.tools wiki API
+  // 2. Fetch thumbnail URL — try fandom wiki, fall back to starcitizen.tools
   try {
     const encoded = encodeURIComponent(shipName.trim())
-    const apiUrl = `https://starcitizen.tools/api.php?action=query&titles=${encoded}&prop=pageimages&format=json&pithumbsize=120&origin=*`
-    const res = await fetch(apiUrl)
-    const json = await res.json()
-    const pages = json?.query?.pages || {}
-    const page = Object.values(pages)[0]
-    const wikiUrl = page?.thumbnail?.source || null
+    const sources = [
+      `https://starcitizen.fandom.com/api.php?action=query&titles=${encoded}&prop=pageimages&format=json&pithumbsize=200&origin=*`,
+      `https://starcitizen.tools/api.php?action=query&titles=${encoded}&prop=pageimages&format=json&pithumbsize=200&origin=*`,
+    ]
+
+    let wikiUrl = null
+    for (const apiUrl of sources) {
+      try {
+        const res = await fetch(apiUrl)
+        const json = await res.json()
+        const pages = json?.query?.pages || {}
+        const page = Object.values(pages)[0]
+        wikiUrl = page?.thumbnail?.source || null
+        if (wikiUrl) break
+      } catch { /* try next source */ }
+    }
 
     if (!wikiUrl) {
+      console.warn(`[crewfind] No thumbnail found for: ${shipName}`)
       shipThumbCache.set(shipName, null)
       return null
     }
@@ -440,9 +451,11 @@ async function fetchShipThumbnail(shipName) {
       )
     } catch { /* cache write failure is non-fatal */ }
 
+    console.log(`[crewfind] Thumbnail cached for "${shipName}":`, finalUrl)
     shipThumbCache.set(shipName, finalUrl)
     return finalUrl
-  } catch {
+  } catch (e) {
+    console.error(`[crewfind] fetchShipThumbnail error for "${shipName}":`, e)
     shipThumbCache.set(shipName, null)
     return null
   }
