@@ -501,7 +501,7 @@
    'submitPost','adjustRole','previewOrgPoster','setPostType','selectShip','toggleInVerseStatus',
    'changeHandle','copyDiscord','openProfile','closeProfile','openOwnProfile','submitRating',
    'saveProfileField','triggerAvatarUpload','uploadAvatar','toggleAddShip','addShipToHangar',
-   'removeShipFromHangar','importHangarCSV','importHangarUrl,'copyToClipboard','setRating','selectHangarShip','openMessagesTab','startConversation','openChat','renderInbox','clearConversation','blockUser','filterBySelect','openReportModal','closeReportModal','submitReport','openAdminPanel','adminHide','adminUnhide','adminBanUser','adminDismissReport','adminAddAdmin','adminRemoveAdmin'].forEach(fn => {
+   'removeShipFromHangar','importHangarCSV','importHangarUrl','copyToClipboard','setRating','selectHangarShip','openMessagesTab','startConversation','openChat','renderInbox','clearConversation','blockUser','filterBySelect','openReportModal','closeReportModal','submitReport','openAdminPanel','adminHide','adminUnhide','adminBanUser','adminDismissReport','adminAddAdmin','adminRemoveAdmin'].forEach(fn => {
     window[fn] = window[fn] || function(...args) {
       document.addEventListener('crewfind:ready', () => window[fn](...args), { once: true })
     }
