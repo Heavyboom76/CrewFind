@@ -410,6 +410,19 @@ async function getRsiMatrix() {
   return _rsiMatrix
 }
 
+// Look up a ship in the RSI matrix with fuzzy fallback.
+// The matrix uses full names like "Drake Buccaneer" / "Crusader Perseus",
+// but our cleaned CSV names are often just "Buccaneer" / "Perseus".
+function matrixLookup(map, name) {
+  const key = name.toLowerCase()
+  if (map.has(key)) return map.get(key)
+  // Try: matrix entry whose name ends with our key (e.g. "drake buccaneer" ends with "buccaneer")
+  for (const [k, v] of map) {
+    if (k === key || k.endsWith(' ' + key)) return v
+  }
+  return null
+}
+
 async function fetchShipThumbnail(shipName) {
   if (shipThumbCache.has(shipName)) return shipThumbCache.get(shipName)
 
@@ -437,9 +450,9 @@ async function fetchShipThumbnail(shipName) {
 
     let imageUrl = null
 
-    // 2a. RSI Ship Matrix — authoritative source, names match exactly
+    // 2a. RSI Ship Matrix — authoritative source
     const matrix = await getRsiMatrix()
-    imageUrl = matrix.get(searchName.toLowerCase()) || null
+    imageUrl = matrixLookup(matrix, searchName)
 
     // 2b. Fandom wiki fallback
     if (!imageUrl) {
