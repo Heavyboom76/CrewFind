@@ -403,6 +403,11 @@ async function fetchShipThumbnail(shipName) {
   // 2. Fetch thumbnail URL — try fandom wiki, fall back to starcitizen.tools
   try {
     const searchName = cleanRsiName(shipName)
+    // Skip obvious bundles/packages — no wiki page will exist for them
+    if (!searchName || BUNDLE_RE.test(searchName)) {
+      shipThumbCache.set(shipName, null)
+      return null
+    }
     const encoded = encodeURIComponent(searchName)
     const sources = [
       `https://starcitizen.fandom.com/api.php?action=query&titles=${encoded}&prop=pageimages&format=json&pithumbsize=200&origin=*`,
@@ -471,12 +476,17 @@ function cleanRsiName(name) {
   let s = name.trim()
   s = s.replace(/^Standalone\s+Ships?\s*[-–]\s*/i, '')       // strip "Standalone Ships - "
   s = s.replace(/^Complete\s+Ships?\s*[-–]\s*/i, '')         // strip "Complete Ship - "
+  s = s.replace(/^Original\s+concept\s*[-–]\s*/i, '')        // strip "Original concept - "
   s = s.replace(/\s+plus\s+.+$/i, '')                        // strip " plus Paint/Item"
   s = s.replace(/\s*[-–]\s*\d+\s*[Yy]ear\s*$/i, '')         // strip " - 10 Year"
-  s = s.replace(/\s*[-–]\s*(Anniversary|Invictus|Showdown|Deluxe|Limited)\s*$/i, '')
+  s = s.replace(/\s*[-–]?\s*Best\s+In\s+Show\s+\d{4}.*$/i, '')  // strip "Best In Show 2955 Edition"
+  s = s.replace(/\s*[-–]\s*(Anniversary|Invictus\s*\d*|Showdown|Deluxe|Limited|Edition)\s*$/i, '')
   s = s.replace(/\s*\(.*?\)\s*$/, '')                        // strip trailing " (anything)"
   return s.trim()
 }
+
+// Keywords that identify RSI bundles/packages that are not a single ship
+const BUNDLE_RE = /\b(package|bundle|starter\s+pack|pledge\s+pack|upgrade\s+token|upgrade\s+kit|gift|item\s+set|completion|add[- ]?on|combo|edition)\b/i
 
 // ── Parse hangar CSV — ships and vehicles only ────────────────────────────────
 const KNOWN_SHIP_NAMES = new Set(SHIPS.map(s => s.name.toLowerCase()))
@@ -498,6 +508,9 @@ function parseHangarCsv(text) {
 
     // Clean RSI pledge-store prefixes/suffixes before matching
     const cleanName = cleanRsiName(name)
+
+    // Always reject if the cleaned name looks like a bundle/package, regardless of type column
+    if (!cleanName || BUNDLE_RE.test(cleanName)) continue
 
     // If a type column exists, only accept rows classified as ship or vehicle
     if (typeIdx !== -1) {
