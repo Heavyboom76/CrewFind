@@ -171,12 +171,8 @@ export async function openProfile(handle) {
             <label style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-dim);display:block;margin-bottom:4px">CSV FILE</label>
             <input type="file" accept=".csv" onchange="importHangarCSV(this)" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text);width:100%" />
           </div>
-          <div>
-            <label style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-dim);display:block;margin-bottom:4px">HANGAR.LINK URL</label>
-            <div style="display:flex;gap:6px">
-              <input class="form-input" id="hangar-url-input" placeholder="https://hangar.link/u/yourname" style="flex:1;font-size:9px" />
-              <button class="btn-post" style="margin-top:0;padding:8px 12px;white-space:nowrap" onclick="importHangarUrl()">IMPORT</button>
-            </div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-dim);line-height:1.6">
+            To import from hangar.link: visit your profile, click <span style="color:var(--text)">Export → CSV</span>, then upload the file above.
           </div>
         </div>` : ''}
         ${hangar.length > 0
@@ -421,32 +417,6 @@ export async function importHangarCSV(input) {
   await replaceHangar(currentUser.id, ships)
 }
 window.importHangarCSV = importHangarCSV
-
-// ── Import hangar from hangar.link URL ────────────────────────────────────────
-export async function importHangarUrl() {
-  const currentUser = getCurrentUser()
-  if (!currentUser) { showToast('// LOGIN REQUIRED'); return }
-  const input = document.getElementById('hangar-url-input')
-  const url = input?.value?.trim()
-  if (!url) { showToast('// ENTER A HANGAR.LINK URL'); return }
-  // hangar.link export endpoint: https://hangar.link/u/USERNAME/export.csv
-  let csvUrl = url
-  if (!csvUrl.endsWith('.csv')) {
-    csvUrl = csvUrl.replace(/\/$/, '') + '/export.csv'
-  }
-  showToast('// FETCHING HANGAR DATA...')
-  try {
-    const res = await fetch(csvUrl)
-    if (!res.ok) throw new Error('fetch failed')
-    const text = await res.text()
-    const ships = parseHangarCsv(text)
-    if (!ships || ships.length === 0) throw new Error('parse failed')
-    await replaceHangar(currentUser.id, ships)
-  } catch {
-    showToast('// ERROR: Could not fetch hangar.link data')
-  }
-}
-window.importHangarUrl = importHangarUrl
 
 // ── Replace entire hangar in Supabase ─────────────────────────────────────────
 async function replaceHangar(userId, ships) {
