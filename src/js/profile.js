@@ -110,7 +110,16 @@ export async function openProfile(handle) {
         <div style="flex:1;min-width:0">
           <div style="font-family:'Orbitron',monospace;font-size:16px;font-weight:700;color:var(--text-bright);letter-spacing:2px;margin-bottom:4px">${esc(handle)}</div>
           <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-dim);letter-spacing:1px;margin-bottom:8px">
-            PILOT SINCE ${new Date(profile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }).toUpperCase()}
+            ${isOwnProfile
+              ? `PILOT SINCE <input type="month"
+                  value="${(profile.pilot_since || profile.created_at || '').slice(0, 7)}"
+                  min="2013-01"
+                  max="${new Date().toISOString().slice(0, 7)}"
+                  title="Set when you started playing Star Citizen"
+                  onchange="saveProfileField('pilot_since', this.value + '-01')"
+                  style="background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1px;cursor:pointer;padding:0 2px;width:auto" />`
+              : `PILOT SINCE ${new Date(profile.pilot_since || profile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }).toUpperCase()}`
+            }
           </div>
           ${avgRating
             ? `<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
@@ -377,16 +386,62 @@ const shipThumbCache = new Map()
 
 async function fetchShipThumbnail(shipName) {
   if (shipThumbCache.has(shipName)) return shipThumbCache.get(shipName)
+
+  // 1. Check Supabase DB cache first
+  try {
+    const { data: cached } = await sb
+      .from('ship_thumbnails')
+      .select('thumbnail_url')
+      .eq('ship_name', shipName)
+      .maybeSingle()
+    if (cached?.thumbnail_url) {
+      shipThumbCache.set(shipName, cached.thumbnail_url)
+      return cached.thumbnail_url
+    }
+  } catch { /* table may not exist yet — fall through to fetch */ }
+
+  // 2. Fetch thumbnail URL from starcitizen.tools wiki API
   try {
     const encoded = encodeURIComponent(shipName.trim())
-    const url = `https://starcitizen.tools/api.php?action=query&titles=${encoded}&prop=pageimages&format=json&pithumbsize=120&origin=*`
-    const res = await fetch(url)
+    const apiUrl = `https://starcitizen.tools/api.php?action=query&titles=${encoded}&prop=pageimages&format=json&pithumbsize=120&origin=*`
+    const res = await fetch(apiUrl)
     const json = await res.json()
     const pages = json?.query?.pages || {}
     const page = Object.values(pages)[0]
-    const thumb = page?.thumbnail?.source || null
-    shipThumbCache.set(shipName, thumb)
-    return thumb
+    const wikiUrl = page?.thumbnail?.source || null
+
+    if (!wikiUrl) {
+      shipThumbCache.set(shipName, null)
+      return null
+    }
+
+    // 3. Download image and upload to Supabase storage bucket
+    let finalUrl = wikiUrl
+    try {
+      const imgRes = await fetch(wikiUrl)
+      if (imgRes.ok) {
+        const blob = await imgRes.blob()
+        const fileName = shipName.trim().replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.jpg'
+        const { error: uploadErr } = await sb.storage
+          .from('ship-thumbnails')
+          .upload(fileName, blob, { contentType: blob.type || 'image/jpeg', upsert: true })
+        if (!uploadErr) {
+          const { data: urlData } = sb.storage.from('ship-thumbnails').getPublicUrl(fileName)
+          finalUrl = urlData.publicUrl
+        }
+      }
+    } catch { /* storage upload failed — keep wikiUrl as fallback */ }
+
+    // 4. Persist to DB cache regardless of whether storage upload succeeded
+    try {
+      await sb.from('ship_thumbnails').upsert(
+        { ship_name: shipName, thumbnail_url: finalUrl, cached_at: new Date().toISOString() },
+        { onConflict: 'ship_name' }
+      )
+    } catch { /* cache write failure is non-fatal */ }
+
+    shipThumbCache.set(shipName, finalUrl)
+    return finalUrl
   } catch {
     shipThumbCache.set(shipName, null)
     return null
