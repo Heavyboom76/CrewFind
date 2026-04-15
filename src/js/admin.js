@@ -24,8 +24,11 @@ export async function checkAdminStatus() {
 export function getIsAdmin() { return isAdmin }
 
 // ── Report button HTML ────────────────────────────────────────────────────────
+function jsStr(val) {
+  return JSON.stringify(String(val == null ? '' : val)).replace(/"/g, '&quot;')
+}
 export function reportButtonHtml(targetType, targetId) {
-  return `<button onclick="event.stopPropagation();openReportModal('${targetType}','${targetId}')" 
+  return `<button onclick="event.stopPropagation();openReportModal(${jsStr(targetType)},${jsStr(targetId)})"
     style="background:none;border:1px solid var(--border);color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;padding:3px 8px;cursor:pointer;transition:all 0.15s"
     onmouseover="this.style.borderColor='var(--danger)';this.style.color='var(--danger)'"
     onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">⚑ REPORT</button>`

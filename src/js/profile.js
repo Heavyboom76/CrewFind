@@ -4,6 +4,18 @@ import { getCurrentUser, getCurrentHandle } from './auth.js'
 import { SHIPS } from './ships.js'
 import { reportButtonHtml } from './admin.js'
 import { startConversation } from './messages.js'
+
+// ── XSS helpers ───────────────────────────────────────────────────────────────
+function esc(str) {
+  if (str == null) return ''
+  return String(str)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+}
+// Safe JS string argument for use inside onclick="fn(jsStr(val))" attributes
+function jsStr(val) {
+  return JSON.stringify(String(val == null ? '' : val)).replace(/"/g, '&quot;')
+}
 // Track which profile is currently open
 let currentProfileHandle = ''
 
@@ -89,14 +101,14 @@ export async function openProfile(handle) {
       <div style="display:flex;align-items:flex-start;gap:16px;margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--border)">
         <div id="profile-avatar-wrap" style="flex-shrink:0;position:relative">
           ${profile.avatar_url
-            ? `<img src="${profile.avatar_url}" style="width:72px;height:72px;border-radius:50%;border:2px solid var(--border-bright);object-fit:cover" />`
-            : `<div style="width:72px;height:72px;border-radius:50%;border:2px solid var(--border-bright);background:rgba(79,168,232,0.1);display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:18px;font-weight:700;color:var(--accent)">${initials}</div>`
+            ? `<img src="${esc(profile.avatar_url)}" style="width:72px;height:72px;border-radius:50%;border:2px solid var(--border-bright);object-fit:cover" />`
+            : `<div style="width:72px;height:72px;border-radius:50%;border:2px solid var(--border-bright);background:rgba(79,168,232,0.1);display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:18px;font-weight:700;color:var(--accent)">${esc(initials)}</div>`
           }
           ${isOwnProfile ? `<button onclick="triggerAvatarUpload()" style="position:absolute;bottom:0;right:0;width:22px;height:22px;border-radius:50%;background:var(--accent);border:none;color:var(--bg);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center">✎</button>` : ''}
           <input type="file" id="avatar-upload" accept="image/*" style="display:none" onchange="uploadAvatar(this)" />
         </div>
         <div style="flex:1;min-width:0">
-          <div style="font-family:'Orbitron',monospace;font-size:16px;font-weight:700;color:var(--text-bright);letter-spacing:2px;margin-bottom:4px">${handle}</div>
+          <div style="font-family:'Orbitron',monospace;font-size:16px;font-weight:700;color:var(--text-bright);letter-spacing:2px;margin-bottom:4px">${esc(handle)}</div>
           <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-dim);letter-spacing:1px;margin-bottom:8px">
             PILOT SINCE ${new Date(profile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }).toUpperCase()}
           </div>
@@ -108,12 +120,12 @@ export async function openProfile(handle) {
             : `<div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-dim);margin-bottom:8px">NO RATINGS YET</div>`
           }
           <div style="display:flex;gap:8px;flex-wrap:wrap">
-            ${profile.discord_handle ? `<a href="javascript:void(0)" onclick="copyToClipboard('@${profile.discord_handle}')" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#5865F2;border:1px solid #5865F2;padding:2px 8px;text-decoration:none;letter-spacing:1px">⊹ DISCORD</a>` : ''}
-            ${profile.twitch ? `<a href="javascript:void(0)" onclick="openExternalUrl('https://twitch.tv/${profile.twitch.replace(/^@/, '')}')" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#9146ff;border:1px solid #9146ff;padding:2px 8px;text-decoration:none;letter-spacing:1px">⊹ TWITCH</a>` : ''}
-            ${profile.youtube ? `<a href="javascript:void(0)" onclick="openExternalUrl('https://youtube.com/@${profile.youtube.replace(/^@/, '')}')" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#ff0000;border:1px solid #ff0000;padding:2px 8px;text-decoration:none;letter-spacing:1px">⊹ YOUTUBE</a>` : ''}
+            ${profile.discord_handle ? `<a href="javascript:void(0)" onclick="copyToClipboard(${jsStr('@' + profile.discord_handle)})" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#5865F2;border:1px solid #5865F2;padding:2px 8px;text-decoration:none;letter-spacing:1px">⊹ DISCORD</a>` : ''}
+            ${profile.twitch ? `<a href="javascript:void(0)" onclick="openExternalUrl(${jsStr('https://twitch.tv/' + profile.twitch.replace(/^@/, ''))})" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#9146ff;border:1px solid #9146ff;padding:2px 8px;text-decoration:none;letter-spacing:1px">⊹ TWITCH</a>` : ''}
+            ${profile.youtube ? `<a href="javascript:void(0)" onclick="openExternalUrl(${jsStr('https://youtube.com/@' + profile.youtube.replace(/^@/, ''))})" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#ff0000;border:1px solid #ff0000;padding:2px 8px;text-decoration:none;letter-spacing:1px">⊹ YOUTUBE</a>` : ''}
           </div>
           ${!isOwnProfile ? `
-          <button onclick="startConversation('${handle}')" style="margin-top:10px;padding:7px 16px;background:transparent;border:1px solid var(--accent);color:var(--accent);font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;width:100%;transition:all 0.15s"
+          <button onclick="startConversation(${jsStr(handle)})" style="margin-top:10px;padding:7px 16px;background:transparent;border:1px solid var(--accent);color:var(--accent);font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;width:100%;transition:all 0.15s"
             onmouseover="this.style.background='rgba(79,168,232,0.1)'" onmouseout="this.style.background='transparent'">
             ✉ MESSAGE PILOT
           </button>
@@ -129,7 +141,7 @@ export async function openProfile(handle) {
         <div style="font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;margin-bottom:8px">// Bio</div>
         ${isOwnProfile
           ? `<textarea id="profile-bio" class="form-input" rows="3" style="resize:none;line-height:1.5" placeholder="Tell the verse about yourself..." maxlength="280" onblur="saveProfileField('bio', this.value)">${profile.bio || ''}</textarea>`
-          : `<div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text);line-height:1.6;padding:10px;border:1px solid var(--border)">${profile.bio || '—'}</div>`
+          : `<div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text);line-height:1.6;padding:10px;border:1px solid var(--border)">${esc(profile.bio || '—')}</div>`
         }
       </div>` : ''}
 
@@ -140,15 +152,15 @@ export async function openProfile(handle) {
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
           <div>
             <label class="form-label">Discord Handle</label>
-            <input class="form-input" id="profile-discord" placeholder="your_handle" value="${profile.discord_handle || ''}" onblur="saveProfileField('discord_handle', this.value)" />
+            <input class="form-input" id="profile-discord" placeholder="your_handle" value="${esc(profile.discord_handle || '')}" onblur="saveProfileField('discord_handle', this.value)" />
           </div>
           <div>
             <label class="form-label">Twitch Username</label>
-            <input class="form-input" id="profile-twitch" placeholder="twitchname" value="${profile.twitch || ''}" onblur="saveProfileField('twitch', this.value)" />
+            <input class="form-input" id="profile-twitch" placeholder="twitchname" value="${esc(profile.twitch || '')}" onblur="saveProfileField('twitch', this.value)" />
           </div>
           <div>
             <label class="form-label">YouTube Handle</label>
-            <input class="form-input" id="profile-youtube" placeholder="@yourchannel" value="${profile.youtube || ''}" onblur="saveProfileField('youtube', this.value)" />
+            <input class="form-input" id="profile-youtube" placeholder="@yourchannel" value="${esc(profile.youtube || '')}" onblur="saveProfileField('youtube', this.value)" />
           </div>
         </div>
       </div>` : ''}
@@ -182,9 +194,9 @@ export async function openProfile(handle) {
                   <div id="ship-thumb-${s.id}" style="width:100%;height:60px;display:flex;align-items:center;justify-content:center;margin-bottom:4px">
                     <div style="font-size:24px;color:var(--border-bright)">◈</div>
                   </div>
-                  <div style="font-size:9px;color:var(--text);line-height:1.3;word-break:break-word">${s.ship_name}</div>
-                  <div style="font-size:8px;color:var(--text-dim)">${s.manufacturer || ''}</div>
-                  ${isOwnProfile ? `<button onclick="removeShipFromHangar('${s.id}')" style="position:absolute;top:2px;right:2px;background:none;border:none;color:var(--danger);cursor:pointer;font-size:10px;padding:0 2px;line-height:1">✕</button>` : ''}
+                  <div style="font-size:9px;color:var(--text);line-height:1.3;word-break:break-word">${esc(s.ship_name)}</div>
+                  <div style="font-size:8px;color:var(--text-dim)">${esc(s.manufacturer || '')}</div>
+                  ${isOwnProfile ? `<button onclick="removeShipFromHangar(${jsStr(s.id)})" style="position:absolute;top:2px;right:2px;background:none;border:none;color:var(--danger);cursor:pointer;font-size:10px;padding:0 2px;line-height:1">✕</button>` : ''}
                 </div>`).join('')}
              </div>`
           : `<div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-dim)">${isOwnProfile ? 'No ships added yet — add your fleet above' : 'No ships listed'}</div>`
@@ -197,8 +209,17 @@ export async function openProfile(handle) {
         <div style="font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;margin-bottom:8px">// Active Listings (${listings.length})</div>
         <div style="display:flex;flex-direction:column;gap:8px">
         ${listings.map(l => {
-  const btns = isOwnProfile ? '<div style="display:flex;gap:8px;margin-top:8px"><button onclick="bumpListing(\'' + l.id + '\')" style="background:none;border:1px solid var(--accent);color:var(--accent);font-family:\'Share Tech Mono\',monospace;font-size:9px;padding:3px 10px;cursor:pointer;letter-spacing:1px">↑ BUMP</button><button onclick="deleteListing(\'' + l.id + '\')" style="background:none;border:1px solid var(--danger);color:var(--danger);font-family:\'Share Tech Mono\',monospace;font-size:9px;padding:3px 10px;cursor:pointer;letter-spacing:1px">✕ DELETE</button></div>' : '';
-  return '<div style="padding:10px 12px;border:1px solid var(--border);background:var(--bg);font-family:\'Share Tech Mono\',monospace;font-size:10px"><div style="color:var(--text-bright);margin-bottom:4px">' + (l.ship || l.org_name || 'LISTING').toUpperCase() + '</div><div style="color:var(--text-dim);margin-bottom:4px">' + (l.mission ? l.mission.toUpperCase() : '') + ' · ' + (l.playstyle || '') + '</div>' + btns + '</div>';
+  const btns = isOwnProfile
+    ? `<div style="display:flex;gap:8px;margin-top:8px">
+        <button onclick="bumpListing(${jsStr(l.id)})" style="background:none;border:1px solid var(--accent);color:var(--accent);font-family:'Share Tech Mono',monospace;font-size:9px;padding:3px 10px;cursor:pointer;letter-spacing:1px">↑ BUMP</button>
+        <button onclick="deleteListing(${jsStr(l.id)})" style="background:none;border:1px solid var(--danger);color:var(--danger);font-family:'Share Tech Mono',monospace;font-size:9px;padding:3px 10px;cursor:pointer;letter-spacing:1px">✕ DELETE</button>
+       </div>`
+    : ''
+  return `<div style="padding:10px 12px;border:1px solid var(--border);background:var(--bg);font-family:'Share Tech Mono',monospace;font-size:10px">
+    <div style="color:var(--text-bright);margin-bottom:4px">${esc(l.ship || l.org_name || 'LISTING').toUpperCase()}</div>
+    <div style="color:var(--text-dim);margin-bottom:4px">${esc(l.mission ? l.mission.toUpperCase() : '')} · ${esc(l.playstyle || '')}</div>
+    ${btns}
+  </div>`
 }).join('')}
 
         </div>
@@ -212,7 +233,7 @@ export async function openProfile(handle) {
           ${[1,2,3,4,5].map(n => `<button onclick="setRating(${n})" data-star="${n}" style="font-size:20px;background:none;border:none;cursor:pointer;color:var(--text-dim);transition:color 0.15s">☆</button>`).join('')}
         </div>
         <input class="form-input" id="rating-comment" placeholder="Leave a comment (optional)" maxlength="140" style="margin-bottom:8px" />
-        <button class="btn-post" style="margin-top:0;padding:8px" onclick="submitRating('${profile.id}')">SUBMIT RATING</button>
+        <button class="btn-post" style="margin-top:0;padding:8px" onclick="submitRating(${jsStr(profile.id)})">SUBMIT RATING</button>
       </div>` : ''}
 
       <!-- Recent Ratings -->
@@ -226,7 +247,7 @@ export async function openProfile(handle) {
                 <span style="color:#e8c84f">${'★'.repeat(r.score)}${'☆'.repeat(5-r.score)}</span>
                 <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-dim)">${new Date(r.created_at).toLocaleDateString()}</span>
               </div>
-              ${r.comment ? `<div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text);font-style:italic">"${r.comment}"</div>` : ''}
+              ${r.comment ? `<div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text);font-style:italic">"${esc(r.comment)}"</div>` : ''}
             </div>`).join('')}
         </div>
       </div>` : ''}
@@ -255,7 +276,7 @@ export async function openProfile(handle) {
         const thumb = await fetchShipThumbnail(s.ship_name)
         const el = document.getElementById(`ship-thumb-${s.id}`)
         if (el && thumb) {
-          el.innerHTML = `<img src="${thumb}" style="max-width:100%;max-height:60px;object-fit:contain;opacity:0.85" />`
+          el.innerHTML = `<img src="${esc(thumb)}" style="max-width:100%;max-height:60px;object-fit:contain;opacity:0.85" />`
         }
       })
     }
