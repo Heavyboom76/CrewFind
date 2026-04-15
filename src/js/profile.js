@@ -384,6 +384,32 @@ window.uploadAvatar = uploadAvatar
 // ── Ship thumbnail cache ───────────────────────────────────────────────────────
 const shipThumbCache = new Map()
 
+// RSI Ship Matrix — fetched once, maps lowercase name → image URL
+let _rsiMatrix = null
+async function getRsiMatrix() {
+  if (_rsiMatrix) return _rsiMatrix
+  try {
+    const res = await fetch('https://robertsspaceindustries.com/ship-matrix/index')
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    const json = await res.json()
+    const map = new Map()
+    for (const ship of json.data || []) {
+      const media = ship.media || []
+      // Prefer store_frontpage → store_hub → first available image
+      const img = media.find(m => m.type?.name === 'store_frontpage')
+               || media.find(m => m.type?.name === 'store_hub')
+               || media[0]
+      if (ship.name && img?.source_url) {
+        map.set(ship.name.toLowerCase(), img.source_url)
+      }
+    }
+    _rsiMatrix = map
+  } catch {
+    _rsiMatrix = new Map() // CORS blocked or network error — fall through to wiki
+  }
+  return _rsiMatrix
+}
+
 async function fetchShipThumbnail(shipName) {
   if (shipThumbCache.has(shipName)) return shipThumbCache.get(shipName)
 
@@ -400,56 +426,71 @@ async function fetchShipThumbnail(shipName) {
     }
   } catch { /* table may not exist yet — fall through to fetch */ }
 
-  // 2. Fetch thumbnail URL — try fandom wiki, fall back to starcitizen.tools
+  // 2. Resolve thumbnail URL
   try {
     const searchName = cleanRsiName(shipName)
-    // Skip obvious bundles/packages — no wiki page will exist for them
+    // Skip obvious bundles/packages
     if (!searchName || BUNDLE_RE.test(searchName)) {
       shipThumbCache.set(shipName, null)
       return null
     }
-    const encoded = encodeURIComponent(searchName)
-    const sources = [
-      `https://starcitizen.fandom.com/api.php?action=query&titles=${encoded}&prop=pageimages&format=json&pithumbsize=200&origin=*`,
-      `https://starcitizen.tools/api.php?action=query&titles=${encoded}&prop=pageimages&format=json&pithumbsize=200&origin=*`,
-    ]
 
-    let wikiUrl = null
-    for (const apiUrl of sources) {
-      try {
-        const res = await fetch(apiUrl)
-        const json = await res.json()
-        const pages = json?.query?.pages || {}
-        const page = Object.values(pages)[0]
-        wikiUrl = page?.thumbnail?.source || null
-        if (wikiUrl) break
-      } catch { /* try next source */ }
+    let imageUrl = null
+
+    // 2a. RSI Ship Matrix — authoritative source, names match exactly
+    const matrix = await getRsiMatrix()
+    imageUrl = matrix.get(searchName.toLowerCase()) || null
+
+    // 2b. Fandom wiki fallback
+    if (!imageUrl) {
+      const encoded = encodeURIComponent(searchName)
+      const wikiSources = [
+        `https://starcitizen.fandom.com/api.php?action=query&titles=${encoded}&prop=pageimages&format=json&pithumbsize=300&origin=*`,
+        `https://starcitizen.tools/api.php?action=query&titles=${encoded}&prop=pageimages&format=json&pithumbsize=300&origin=*`,
+      ]
+      for (const apiUrl of wikiSources) {
+        try {
+          const res = await fetch(apiUrl)
+          const json = await res.json()
+          const pages = json?.query?.pages || {}
+          const page = Object.values(pages)[0]
+          const candidate = page?.thumbnail?.source || null
+          if (candidate) {
+            // Verify the image is actually reachable before using it
+            const probe = await fetch(candidate, { method: 'HEAD' })
+            if (probe.ok) { imageUrl = candidate; break }
+          }
+        } catch { /* try next source */ }
+      }
     }
 
-    if (!wikiUrl) {
-      console.warn(`[crewfind] No thumbnail found for: "${searchName}" (original: "${shipName}")`)
+    if (!imageUrl) {
+      console.warn(`[crewfind] No thumbnail found for: "${searchName}"`)
       shipThumbCache.set(shipName, null)
       return null
     }
 
-    // 3. Download image and upload to Supabase storage bucket
-    let finalUrl = wikiUrl
+    // 3. Upload to Supabase storage bucket for permanent hosting
+    let finalUrl = null
     try {
-      const imgRes = await fetch(wikiUrl)
+      const imgRes = await fetch(imageUrl)
       if (imgRes.ok) {
         const blob = await imgRes.blob()
-        const fileName = shipName.trim().replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.jpg'
+        const fileName = searchName.trim().replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.jpg'
         const { error: uploadErr } = await sb.storage
           .from('ship-thumbnails')
           .upload(fileName, blob, { contentType: blob.type || 'image/jpeg', upsert: true })
         if (!uploadErr) {
           const { data: urlData } = sb.storage.from('ship-thumbnails').getPublicUrl(fileName)
           finalUrl = urlData.publicUrl
+        } else {
+          finalUrl = imageUrl  // storage failed but image is reachable — use source directly
         }
       }
-    } catch { /* storage upload failed — keep wikiUrl as fallback */ }
+      // if !imgRes.ok, finalUrl stays null — don't cache a broken URL
+    } catch { finalUrl = null }
 
-    // 4. Persist to DB cache regardless of whether storage upload succeeded
+    // 4. Persist to DB cache
     try {
       await sb.from('ship_thumbnails').upsert(
         { ship_name: shipName, thumbnail_url: finalUrl, cached_at: new Date().toISOString() },
