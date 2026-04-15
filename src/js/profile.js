@@ -376,19 +376,35 @@ async function fetchShipThumbnail(shipName) {
   }
 }
 
-// ── Parse hangar.link CSV ─────────────────────────────────────────────────────
+// ── Parse hangar CSV — ships and vehicles only ────────────────────────────────
+const KNOWN_SHIP_NAMES = new Set(SHIPS.map(s => s.name.toLowerCase()))
+
 function parseHangarCsv(text) {
   const lines = text.trim().split('\n')
   const header = lines[0].toLowerCase().replace(/\r/, '').split(',')
-  const nameIdx = header.findIndex(h => h.includes('name') || h.includes('ship'))
+  const nameIdx = header.findIndex(h => h === 'name' || h.includes('ship_name') || h.includes('ship name'))
+    ?? header.findIndex(h => h.includes('name'))
   const mfgIdx = header.findIndex(h => h.includes('manufacturer') || h.includes('mfg'))
+  const typeIdx = header.findIndex(h => h === 'type' || h === 'category' || h === 'item type' || h === 'item_type')
   if (nameIdx === -1) return null
+
   const ships = []
   for (let i = 1; i < lines.length; i++) {
     const cols = lines[i].replace(/\r/, '').split(',')
     const name = cols[nameIdx]?.trim()
+    if (!name) continue
+
+    // If a type column exists, only accept rows classified as ship or vehicle
+    if (typeIdx !== -1) {
+      const type = cols[typeIdx]?.trim().toLowerCase() || ''
+      if (!type.includes('ship') && !type.includes('vehicle')) continue
+    } else {
+      // No type column — cross-reference against known ships list
+      if (!KNOWN_SHIP_NAMES.has(name.toLowerCase())) continue
+    }
+
     const manufacturer = mfgIdx !== -1 ? cols[mfgIdx]?.trim() : ''
-    if (name) ships.push({ name, manufacturer: manufacturer || '' })
+    ships.push({ name, manufacturer: manufacturer || '' })
   }
   return ships
 }
