@@ -453,8 +453,6 @@ async function fetchShipThumbnail(shipName) {
     // 2a. RSI Ship Matrix — authoritative source
     const matrix = await getRsiMatrix()
     imageUrl = matrixLookup(matrix, searchName)
-    if (imageUrl) console.log(`[crewfind] Matrix hit: "${searchName}" →`, imageUrl)
-    else console.warn(`[crewfind] Matrix miss for: "${searchName}" (matrix size: ${matrix.size})`)
 
     // 2b. Fandom wiki fallback
     if (!imageUrl) {
