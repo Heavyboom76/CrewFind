@@ -128,7 +128,6 @@ export const SHIPS = [
   { name: 'P-52 Merlin', manufacturer: 'Kruger', type: 'solo' },
   { name: 'P-72 Archimedes', manufacturer: 'Kruger', type: 'solo' },
   { name: 'Fortune', manufacturer: 'MISC', type: 'solo' },
-  { name: 'Hull A', manufacturer: 'MISC', type: 'solo' },
   { name: 'Prospector', manufacturer: 'MISC', type: 'solo' },
   { name: 'Razor', manufacturer: 'MISC', type: 'solo' },
   { name: 'Razor EX', manufacturer: 'MISC', type: 'solo' },

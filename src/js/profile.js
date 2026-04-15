@@ -158,20 +158,37 @@ export async function openProfile(handle) {
         <div style="font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;margin-bottom:8px">// Ship Hangar${isOwnProfile ? ' <span style="color:var(--accent);cursor:pointer;font-size:9px" onclick="toggleAddShip()">+ ADD</span>' : ''}</div>
         ${isOwnProfile ? `
         <div id="add-ship-form" style="display:none;margin-bottom:12px;padding:12px;border:1px solid var(--border);background:var(--bg)">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-dim);letter-spacing:1px;margin-bottom:6px">MANUAL ADD</div>
           <div class="ship-select-wrapper" style="margin-bottom:8px">
             <input class="form-input" id="hangar-ship-search" placeholder="Search ships..." autocomplete="off" />
             <div class="ship-dropdown" id="hangar-ship-dropdown"></div>
             <input type="hidden" id="hangar-ship-value" />
           </div>
-          <button class="btn-post" style="margin-top:0;padding:8px" onclick="addShipToHangar()">ADD TO HANGAR</button>
+          <button class="btn-post" style="margin-top:0;padding:8px;margin-bottom:16px" onclick="addShipToHangar()">ADD TO HANGAR</button>
+          <div style="border-top:1px solid var(--border);margin-bottom:12px"></div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-dim);letter-spacing:1px;margin-bottom:8px">IMPORT (REPLACES CURRENT HANGAR)</div>
+          <div style="margin-bottom:8px">
+            <label style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-dim);display:block;margin-bottom:4px">CSV FILE</label>
+            <input type="file" accept=".csv" onchange="importHangarCSV(this)" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text);width:100%" />
+          </div>
+          <div>
+            <label style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-dim);display:block;margin-bottom:4px">HANGAR.LINK URL</label>
+            <div style="display:flex;gap:6px">
+              <input class="form-input" id="hangar-url-input" placeholder="https://hangar.link/u/yourname" style="flex:1;font-size:9px" />
+              <button class="btn-post" style="margin-top:0;padding:8px 12px;white-space:nowrap" onclick="importHangarUrl()">IMPORT</button>
+            </div>
+          </div>
         </div>` : ''}
         ${hangar.length > 0
-          ? `<div style="display:flex;flex-wrap:wrap;gap:6px">
+          ? `<div id="hangar-ship-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px">
               ${hangar.map(s => `
-                <div style="display:flex;align-items:center;gap:6px;padding:4px 10px;border:1px solid var(--border);background:var(--bg);font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text)">
-                  ${s.ship_name}
-                  <span style="color:var(--text-dim);font-size:9px">${s.manufacturer || ''}</span>
-                  ${isOwnProfile ? `<button onclick="removeShipFromHangar('${s.id}')" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:11px;padding:0 2px">✕</button>` : ''}
+                <div id="ship-card-${s.id}" style="position:relative;border:1px solid var(--border);background:var(--bg);padding:6px;text-align:center;font-family:'Share Tech Mono',monospace">
+                  <div id="ship-thumb-${s.id}" style="width:100%;height:60px;display:flex;align-items:center;justify-content:center;margin-bottom:4px">
+                    <div style="font-size:24px;color:var(--border-bright)">◈</div>
+                  </div>
+                  <div style="font-size:9px;color:var(--text);line-height:1.3;word-break:break-word">${s.ship_name}</div>
+                  <div style="font-size:8px;color:var(--text-dim)">${s.manufacturer || ''}</div>
+                  ${isOwnProfile ? `<button onclick="removeShipFromHangar('${s.id}')" style="position:absolute;top:2px;right:2px;background:none;border:none;color:var(--danger);cursor:pointer;font-size:10px;padding:0 2px;line-height:1">✕</button>` : ''}
                 </div>`).join('')}
              </div>`
           : `<div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-dim)">${isOwnProfile ? 'No ships added yet — add your fleet above' : 'No ships listed'}</div>`
@@ -232,9 +249,19 @@ export async function openProfile(handle) {
       </div>` : ''}
     `
 
-    // Init hangar ship search if own profile
+    // Init hangar ship search and load thumbnails if own profile
     if (isOwnProfile) {
       initHangarSearch()
+    }
+    // Load thumbnails async for all hangar ships
+    if (hangar.length > 0) {
+      hangar.forEach(async s => {
+        const thumb = await fetchShipThumbnail(s.ship_name)
+        const el = document.getElementById(`ship-thumb-${s.id}`)
+        if (el && thumb) {
+          el.innerHTML = `<img src="${thumb}" style="max-width:100%;max-height:60px;object-fit:contain;opacity:0.85" />`
+        }
+      })
     }
 
   } catch (e) {
@@ -327,6 +354,99 @@ export async function uploadAvatar(input) {
   }
 }
 window.uploadAvatar = uploadAvatar
+
+// ── Ship thumbnail cache ───────────────────────────────────────────────────────
+const shipThumbCache = new Map()
+
+async function fetchShipThumbnail(shipName) {
+  if (shipThumbCache.has(shipName)) return shipThumbCache.get(shipName)
+  try {
+    const encoded = encodeURIComponent(shipName.trim())
+    const url = `https://starcitizen.tools/api.php?action=query&titles=${encoded}&prop=pageimages&format=json&pithumbsize=120&origin=*`
+    const res = await fetch(url)
+    const json = await res.json()
+    const pages = json?.query?.pages || {}
+    const page = Object.values(pages)[0]
+    const thumb = page?.thumbnail?.source || null
+    shipThumbCache.set(shipName, thumb)
+    return thumb
+  } catch {
+    shipThumbCache.set(shipName, null)
+    return null
+  }
+}
+
+// ── Parse hangar.link CSV ─────────────────────────────────────────────────────
+function parseHangarCsv(text) {
+  const lines = text.trim().split('\n')
+  const header = lines[0].toLowerCase().replace(/\r/, '').split(',')
+  const nameIdx = header.findIndex(h => h.includes('name') || h.includes('ship'))
+  const mfgIdx = header.findIndex(h => h.includes('manufacturer') || h.includes('mfg'))
+  if (nameIdx === -1) return null
+  const ships = []
+  for (let i = 1; i < lines.length; i++) {
+    const cols = lines[i].replace(/\r/, '').split(',')
+    const name = cols[nameIdx]?.trim()
+    const manufacturer = mfgIdx !== -1 ? cols[mfgIdx]?.trim() : ''
+    if (name) ships.push({ name, manufacturer: manufacturer || '' })
+  }
+  return ships
+}
+
+// ── Import hangar from CSV file ───────────────────────────────────────────────
+export async function importHangarCSV(input) {
+  const currentUser = getCurrentUser()
+  if (!currentUser) { showToast('// LOGIN REQUIRED'); return }
+  const file = input.files[0]
+  if (!file) return
+  const text = await file.text()
+  const ships = parseHangarCsv(text)
+  if (!ships || ships.length === 0) { showToast('// ERROR: Could not parse CSV'); return }
+  await replaceHangar(currentUser.id, ships)
+}
+window.importHangarCSV = importHangarCSV
+
+// ── Import hangar from hangar.link URL ────────────────────────────────────────
+export async function importHangarUrl() {
+  const currentUser = getCurrentUser()
+  if (!currentUser) { showToast('// LOGIN REQUIRED'); return }
+  const input = document.getElementById('hangar-url-input')
+  const url = input?.value?.trim()
+  if (!url) { showToast('// ENTER A HANGAR.LINK URL'); return }
+  // hangar.link export endpoint: https://hangar.link/u/USERNAME/export.csv
+  let csvUrl = url
+  if (!csvUrl.endsWith('.csv')) {
+    csvUrl = csvUrl.replace(/\/$/, '') + '/export.csv'
+  }
+  showToast('// FETCHING HANGAR DATA...')
+  try {
+    const res = await fetch(csvUrl)
+    if (!res.ok) throw new Error('fetch failed')
+    const text = await res.text()
+    const ships = parseHangarCsv(text)
+    if (!ships || ships.length === 0) throw new Error('parse failed')
+    await replaceHangar(currentUser.id, ships)
+  } catch {
+    showToast('// ERROR: Could not fetch hangar.link data')
+  }
+}
+window.importHangarUrl = importHangarUrl
+
+// ── Replace entire hangar in Supabase ─────────────────────────────────────────
+async function replaceHangar(userId, ships) {
+  try {
+    const { error: delError } = await sb.from('hangars').delete().eq('user_id', userId)
+    if (delError) throw delError
+    const rows = ships.map(s => ({ user_id: userId, ship_name: s.name, manufacturer: s.manufacturer }))
+    const { error: insError } = await sb.from('hangars').insert(rows)
+    if (insError) throw insError
+    showToast(`// HANGAR UPDATED — ${ships.length} SHIPS IMPORTED`)
+    if (currentProfileHandle) openProfile(currentProfileHandle)
+  } catch (e) {
+    console.error('replaceHangar error:', e)
+    showToast('// ERROR: Hangar import failed')
+  }
+}
 
 // ── Hangar ────────────────────────────────────────────────────────────────────
 export function toggleAddShip() {
