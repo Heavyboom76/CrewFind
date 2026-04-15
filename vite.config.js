@@ -8,8 +8,11 @@ export default defineConfig({
   root: 'src',
   publicDir: resolve(__dirname, 'src/public'),
   build: {
-    outDir: '../www',
+    outDir: resolve(__dirname, 'www'),
     emptyOutDir: false,
+    rollupOptions: {
+      input: resolve(__dirname, 'src/app.html'),
+    },
   },
   server: {
     open: true,

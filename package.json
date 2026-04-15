@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "vite src --open",
-    "build": "vite build src --outDir ../www --emptyOutDir",
+    "build": "vite build",
     "preview": "vite preview"
   },
   "keywords": [],
