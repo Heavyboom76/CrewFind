@@ -133,7 +133,7 @@ export function changeHandle() {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function missionColor(m) {
-  const map = { bounty:'bounty', cargo:'cargo', patrol:'patrol', explore:'explore', mining:'mining', salvage:'salvage', medical:'medical', piracy:'piracy', escort:'escort', ground:'ground' }
+  const map = { bounty:'bounty', cargo:'cargo', patrol:'patrol', explore:'explore', mining:'mining', salvage:'salvage', medical:'medical', piracy:'piracy', escort:'escort', ground:'ground', qvbreaker:'qvbreaker', hathor:'hathor', asd:'asd', cz:'cz', bunkers:'bunkers', other:'other' }
   return map[m] || 'patrol'
 }
 

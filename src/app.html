@@ -72,6 +72,12 @@
   .mission-type.piracy { color: #e84f6a; border-color: rgba(232,79,106,0.3); background: rgba(232,79,106,0.06); }
   .mission-type.escort { color: #8fe8d8; border-color: rgba(143,232,216,0.3); background: rgba(143,232,216,0.06); }
   .mission-type.ground { color: #c8a878; border-color: rgba(200,168,120,0.3); background: rgba(200,168,120,0.06); }
+  .mission-type.qvbreaker { color: #e87840; border-color: rgba(232,120,64,0.3); background: rgba(232,120,64,0.06); }
+  .mission-type.hathor { color: #50e8b0; border-color: rgba(80,232,176,0.3); background: rgba(80,232,176,0.06); }
+  .mission-type.asd { color: #d450e8; border-color: rgba(212,80,232,0.3); background: rgba(212,80,232,0.06); }
+  .mission-type.cz { color: #e84040; border-color: rgba(232,64,64,0.3); background: rgba(232,64,64,0.06); }
+  .mission-type.bunkers { color: #c89040; border-color: rgba(200,144,64,0.3); background: rgba(200,144,64,0.06); }
+  .mission-type.other { color: #909090; border-color: rgba(144,144,144,0.3); background: rgba(144,144,144,0.06); }
   .card-owner { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
   .owner-avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Orbitron', monospace; font-size: 9px; font-weight: 700; border: 1px solid var(--border-bright); background: rgba(79,168,232,0.1); color: var(--accent); }
   .owner-info { flex: 1; }
@@ -370,6 +376,7 @@
         <span class="filter-label">Mission:</span>
         <select class="filter-select" id="mission-filter" onchange="filterBySelect(this.value)">
           <option value="all">All</option>
+          <optgroup label="── Standard ──">
           <option value="bounty">Bounty Hunting</option>
           <option value="cargo">Cargo Run</option>
           <option value="patrol">Patrol</option>
@@ -380,8 +387,19 @@
           <option value="piracy">PvP/Piracy</option>
           <option value="escort">Escort</option>
           <option value="ground">Ground Combat</option>
+          </optgroup>
+          <optgroup label="── Events ──">
+          <option value="qvbreaker">QV Breaker Station</option>
+          <option value="hathor">Hathor</option>
+          <option value="asd">ASD Facilities</option>
+          <option value="cz">CZ</option>
+          <option value="bunkers">Bunkers</option>
+          <option value="other">Other</option>
+          </optgroup>
+          <optgroup label="── Posts ──">
           <option value="solo">Solo/LFG</option>
           <option value="org">Org Recruit</option>
+          </optgroup>
         </select>
       </div>
       <div class="listings" id="listings-grid"></div>
@@ -437,7 +455,7 @@
     <div id="crew-fields">
       <div class="form-row">
         <div class="form-group"><label class="form-label">Ship</label><div class="ship-select-wrapper"><input class="form-input" id="f-ship-search" placeholder="Search ships..." autocomplete="off" /><div class="ship-dropdown" id="ship-dropdown"></div><input type="hidden" id="f-ship" /></div></div>
-        <div class="form-group"><label class="form-label">Mission Type</label><select class="form-select" id="f-mission"><option value="bounty">Bounty Hunting</option><option value="cargo">Cargo Run</option><option value="patrol">Patrol</option><option value="explore">Exploration</option><option value="mining">Mining</option><option value="salvage">Salvage</option><option value="medical">Medical/Rescue</option><option value="piracy">PvP/Piracy</option><option value="escort">Escort</option><option value="ground">Ground Combat</option></select></div>
+        <div class="form-group"><label class="form-label">Mission Type</label><select class="form-select" id="f-mission"><optgroup label="── Standard ──"><option value="bounty">Bounty Hunting</option><option value="cargo">Cargo Run</option><option value="patrol">Patrol</option><option value="explore">Exploration</option><option value="mining">Mining</option><option value="salvage">Salvage</option><option value="medical">Medical/Rescue</option><option value="piracy">PvP/Piracy</option><option value="escort">Escort</option><option value="ground">Ground Combat</option></optgroup><optgroup label="── Events ──"><option value="qvbreaker">QV Breaker Station</option><option value="hathor">Hathor</option><option value="asd">ASD Facilities</option><option value="cz">CZ</option><option value="bunkers">Bunkers</option><option value="other">Other</option></optgroup></select></div>
       </div>
       <div class="form-group">
         <label class="form-label">Roles Needed</label>
@@ -458,7 +476,7 @@
     <div id="solo-fields" style="display:none">
       <div class="form-row">
         <div class="form-group"><label class="form-label">Your Ship</label><div class="ship-select-wrapper"><input class="form-input" id="f-solo-ship-search" placeholder="Search ships..." autocomplete="off" /><div class="ship-dropdown" id="solo-ship-dropdown"></div><input type="hidden" id="f-solo-ship" /></div></div>
-        <div class="form-group"><label class="form-label">Activity</label><select class="form-select" id="f-solo-mission"><option value="bounty">Bounty Hunting</option><option value="cargo">Cargo Run</option><option value="patrol">Patrol</option><option value="explore">Exploration</option><option value="mining">Mining</option><option value="salvage">Salvage</option><option value="medical">Medical/Rescue</option><option value="piracy">PvP/Piracy</option><option value="escort">Escort</option><option value="ground">Ground Combat</option></select></div>
+        <div class="form-group"><label class="form-label">Activity</label><select class="form-select" id="f-solo-mission"><optgroup label="── Standard ──"><option value="bounty">Bounty Hunting</option><option value="cargo">Cargo Run</option><option value="patrol">Patrol</option><option value="explore">Exploration</option><option value="mining">Mining</option><option value="salvage">Salvage</option><option value="medical">Medical/Rescue</option><option value="piracy">PvP/Piracy</option><option value="escort">Escort</option><option value="ground">Ground Combat</option></optgroup><optgroup label="── Events ──"><option value="qvbreaker">QV Breaker Station</option><option value="hathor">Hathor</option><option value="asd">ASD Facilities</option><option value="cz">CZ</option><option value="bunkers">Bunkers</option><option value="other">Other</option></optgroup></select></div>
       </div>
       <div class="form-group"><label class="form-label">What you're looking for</label><input class="form-input" id="f-solo-note" placeholder="e.g. Looking to join a mining fleet..." maxlength="120" /></div>
     </div>
