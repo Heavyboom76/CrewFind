@@ -51,7 +51,9 @@ export function missionLabel(m) {
     bounty: 'Bounty Hunting', cargo: 'Cargo Run', patrol: 'Patrol',
     explore: 'Exploration', mining: 'Mining', salvage: 'Salvage',
     medical: 'Medical/Rescue', piracy: 'PvP/Piracy', escort: 'Escort',
-    ground: 'Ground Combat', pvp: 'PvP/Piracy'
+    ground: 'Ground Combat', pvp: 'PvP/Piracy',
+    qvbreaker: 'QV Breaker Station', hathor: 'Hathor', asd: 'ASD Facilities',
+    cz: 'CZ', bunkers: 'Bunkers', other: 'Other'
   }
   return map[m] || m
 }
