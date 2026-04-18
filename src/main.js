@@ -120,4 +120,15 @@ document.getElementById('tab-btn-my-posts')?.addEventListener('click', async fun
 
 document.dispatchEvent(new Event('crewfind:ready'))
 
+// ── Auto-refresh ──────────────────────────────────────────────────────────────
+// Refresh listings when the user switches back to this tab
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) {
+    renderListings()
+    checkUnread()
+  }
+})
+// Also poll every 90 seconds in the background so listings stay fresh
+setInterval(() => { if (!document.hidden) renderListings() }, 90_000)
+
 // ── Messages module ───────────────────────────────────────────────────────────

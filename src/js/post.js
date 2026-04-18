@@ -3,6 +3,9 @@ import { showToast } from './ui.js'
 import { getCurrentHandle, getCurrentUser } from './auth.js'
 import { renderListings } from './listings.js'
 
+const withTimeout = (promise, ms = 12000) =>
+  Promise.race([promise, new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms))])
+
 let currentPostType = 'crew'
 
 export function setPostType(type) {
@@ -110,14 +113,14 @@ export async function submitPost() {
           org_poster_url = urlData?.publicUrl || null
         }
       }
-      const { error } = await sb.from('listings').insert([{
+      const { error } = await withTimeout(sb.from('listings').insert([{
         ship: orgName, mission: 'org', owner, timezone: system, playstyle: style,
         roles: 'org', discord, owner_discord: discordUser || discord,
         expires_at: new Date(Date.now() + 7*24*60*60*1000).toISOString(),
         post_type: 'org', solo_note: pitch,
         org: orgTag || null, org_name: orgName,
         org_roles: orgRoles || null, org_poster_url
-      }])
+      }]))
       if (error) throw error
       closePostModal()
       await renderListings()
@@ -141,12 +144,12 @@ export async function submitPost() {
     const org = document.getElementById('f-org')?.value?.trim() || null
     if (btn) { btn.textContent = 'TRANSMITTING...'; btn.disabled = true }
     try {
-      const { error } = await sb.from('listings').insert([{
+      const { error } = await withTimeout(sb.from('listings').insert([{
         ship, mission, owner, timezone: system, playstyle: style,
         roles: currentPostType, discord, owner_discord: discord || discordUser,
         expires_at: new Date(Date.now() + 7*24*60*60*1000).toISOString(),
         post_type: currentPostType, solo_note, org
-      }])
+      }]))
       if (error) throw error
       ;['f-solo-ship','f-solo-ship-search','f-solo-note','f-discord'].forEach(id => {
         const el = document.getElementById(id); if (el) el.value = ''
@@ -180,11 +183,11 @@ export async function submitPost() {
   const org = document.getElementById('f-org')?.value?.trim() || null
   if (btn) { btn.textContent = 'TRANSMITTING...'; btn.disabled = true }
   try {
-    const { error } = await sb.from('listings').insert([{
+    const { error } = await withTimeout(sb.from('listings').insert([{
       ship, mission, owner, timezone: system, playstyle: style,
       roles: roles.join(','), discord, owner_discord: discord || discordUser,
       expires_at: new Date(Date.now() + 7*24*60*60*1000).toISOString(), org
-    }])
+    }]))
     if (error) throw error
     ;['f-ship','f-ship-search','f-discord'].forEach(id => { const el = document.getElementById(id); if (el) el.value = '' })
     document.querySelectorAll('#roles-grid .role-count').forEach(el => { el.textContent = '0' })
